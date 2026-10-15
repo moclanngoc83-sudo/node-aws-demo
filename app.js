@@ -1,58 +1,70 @@
 const express = require('express');
-const  session = require('express-session');
+const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bycryptjs');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 
 const app = express();
 const PORT = 3000;
 
-app.set('view engine','ejs');
-app.set('view',path.join(__dirname, 'view'));
-app.use(express.urlencode({ extended: true}));
+// Cấu hình View Engine & Middleware
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.urlencoded({ extended: true }));
 app.use(session({
-secret: 'mật_khẩu_bí_mật_web_truyện',
-resave: false,
-saveUninitialized: true
+  secret: 'mật_khẩu_bí_mật_web_truyện',
+  resave: false,
+  saveUninitialized: true
 }));
 
+// Khởi tạo CSDL SQLite
 const db = new sqlite3.Database('./database.db', (err) => {
-if (err) console.error(err.message);
-console.log('Đã kết nối CSDL SQLite thành công.');
+  if (err) console.error(err.message);
+  console.log('Đã kết nối CSDL SQLite thành công.');
 });
 
+// Tạo các Bảng dữ liệu tự động
 db.serialize(() => {
-db.run('CREATE TABLE IF NOT EXISTS users (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-username TEXT UNIQUE,
-password TEXT,
-role TEXT DEFAULT 'user
-)');
-db.run('CREAT TABLE IF NOT EXISTS stories (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-title TEXT,
-description TEXT,
-author_id INTEGER,
-created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)');
+  // Bảng Users (vai trò: 'user', 'author', 'admin')
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    role TEXT DEFAULT 'user'
+  )`);
 
-db.run('CREAT TABLE IF NOT EXISTS chapters (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-story_id INTEGER,
-chapter_number INTEGER,
-title TEXT,
-content TEXT
-)');
+  // Bảng Stories (Truyện)
+  db.run(`CREATE TABLE IF NOT EXISTS stories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    description TEXT,
+    author_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
 
-const defaultAdminPass = bcrypt.hashSync('admin123', 10);
-db.run('INSERT OR IGNORE INTO users (id, username, password, role) VALUE (1, 'admin', ?, 'admin')', [defaultAdminPass]);
+  // Bảng Chapters (Chương)
+  db.run(`CREATE TABLE IF NOT EXISTS chapters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    story_id INTEGER,
+    chapter_number INTEGER,
+    title TEXT,
+    content TEXT
+  )`);
+
+  // Tạo tài khoản Admin mặc định (admin / admin123)
+  const defaultAdminPass = bcrypt.hashSync('admin123', 10);
+  db.run(`INSERT OR IGNORE INTO users (id, username, password, role) VALUES (1, 'admin', ?, 'admin')`, [defaultAdminPass]);
 });
 
+// Middleware truyền thông tin người dùng vào giao diện
 app.use((req, res, next) => {
-res.locals.user = req.session.user || null;
-next();
+  res.locals.user = req.session.user || null;
+  next();
 });
 
+// --- ROUTE TRANG CHỦ & ĐỌC TRUYỆN ---
+
+// Trang chủ danh sách truyện
 app.get('/', (req, res) => {
   db.all(`SELECT stories.*, users.username as author_name FROM stories JOIN users ON stories.author_id = users.id`, [], (err, stories) => {
     res.render('index', { stories: stories || [] });

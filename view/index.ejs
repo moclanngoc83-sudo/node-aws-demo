@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Đọc Truyện Online</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f6f9; }
+        .nav { background: #333; padding: 10px; color: white; display: flex; gap: 15px; }
+        .nav a { color: white; text-decoration: none; }
+        .container { max-width: 900px; margin: 20px auto; }
+        .card{ background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/"><b>Trang chủ</b></a>
+        <% if (user) { %>
+            <span>Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
+            <% if (user.role === 'author' || user.role === 'admin') { %><a href="/author">Khu vựa tác giả</a><% } %>
+            <% if (user.role === 'admin') { %><a href="/admin">Khu vực Admin</a><% } %>
+            <a href="/logout">Đăng Xuất</a>
+        <% } else { %>
+            <a href="/login">Đăng Nhập</a>
+            <a href="/register">Đăng Ký</a>
+        <% } %>
+    </div>
+
+    <div class="container">
+        <h2>Danh Sách Truyện Mới Cập Nhật</h2>
+        <% stories.forEach(story => { %>
+            <div class="card">
+                <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
+                <p>Tác giả: <b><%= story.author_name %></b></p>
+                <p><%= story.description %></p>
+            </div>
+        <% }) %>
+    </div>
+</body>
+</html>

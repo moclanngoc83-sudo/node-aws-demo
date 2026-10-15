@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Đăng Ký Tài Khoản</title></head>
+<body style="font-family: Arial; padding: 50px; text-align: center;">
+    <h2>Đăng Ký Tài Khoản</h2>
+    <form method="POST" action="/register" style="display: inline-block; text-align: left;">
+        <div>Tên đăng nhập: <br><input type="text" name="username" required></div><br>
+        <div>Mật khẩu: <br><input type="password" name="password" required></div><br>
+        <div>Loại tài khoản: <br>
+            <select name="role">
+                <option value="user">Độc giả (Người đọc)</option>
+                <option value="user">Tác giả</option>
+            </select>
+        </div><br>
+        <button type="submit">Đăng Ký</button>
+    </form>
+</body>
+</html>

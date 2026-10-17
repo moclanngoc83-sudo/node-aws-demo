@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Thể Loại Truyện</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6; }
+        .form-group { margin-bottom: 15px; }
+        input[type="text"] { width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f8f9fa; padding: 8px 12px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <a href="/admin">← Quay lại Bảng điều khiển Admin</a>
+    <h2>Quản Lý Thể Loại Truyện</h2>
+
+    <!-- Form Thêm Thể Loại Mới -->
+    <form method="POST" action="/admin/add-category" class="form-group">
+        <input type="text" name="category_name" placeholder="Nhập tên thể loại mới..." required>
+        <button type="submit" class="btn">Thêm Thể Loại</button>
+    </form>
+
+    <h3>Danh Sách Thể Loại Hiện Có:</h3>
+    <ul>
+        <% categories.forEach(cat => { %>
+            <li><b><%= cat.id %>.</b> <%= cat.name %></li>
+        <% }) %>
+    </ul>
+</body>
+</html>

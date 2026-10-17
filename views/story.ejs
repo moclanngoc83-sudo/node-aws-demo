@@ -10,7 +10,12 @@
     <h3>Danh Sách Chương:</h3>
     <ul>
         <% chapters.forEach(chap => { %>
-            <li><a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%=chap.title %></a></li>
+            <li>
+                <a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%= chap.title %></a>
+                <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
+                    — <a href="/author/edit-chapter/<%= chap.id %>" style="color: #007bff;">[Sửa]</a>
+                <% } %>
+            </li>
         <% }) %>
     </ul>
 

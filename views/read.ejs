@@ -1,10 +1,54 @@
 <!DOCTYPE html>
-<html>
-<head><title>Chương <%= chapter.chapter_number %>: <%= chapter.title %></title></head>
-<body style="font-family: Arial; max-width: 800px; margin: auto; padding: 20px; line-height: 1.8;">
-    <a href="/story/<%= chapter.story_id %>">← Về trang chi tiết truyện</a>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chương <%= chapter.chapter_number %>: <%= chapter.title %></title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.8; background: #f9f9f9; color: #333; }
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
+        .btn { padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .btn.disabled { background-color: #ccc; cursor: not-allowed; pointer-events: none; }
+        .content { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: pre-wrap; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <a href="/story/<%= chapter.story_id %>" style="text-decoration: none;">← Về danh sách chương</a>
+
     <h2>Chương <%= chapter.chapter_number %>: <%= chapter.title %></h2>
-    <hr>
-    <div style="white-space: pre-wrap; font-size: 18px;"><%= chapter.content %></div>
+
+    <!-- Thanh chuyển chương phía trên -->
+    <div class="nav-buttons">
+        <% if (prevChapterId) { %>
+            <a href="/chapter/<%= prevChapterId %>" class="btn">← Chương Trước</a>
+        <% } else { %>
+            <span class="btn disabled">← Chương Trước</span>
+        <% } %>
+
+        <a href="/story/<%= chapter.story_id %>" style="color: #666;">Mục Lục</a>
+
+        <% if (nextChapterId) { %>
+            <a href="/chapter/<%= nextChapterId %>" class="btn">Chương Sau →</a>
+        <% } else { %>
+            <span class="btn disabled">Chương Sau →</span>
+        <% } %>
+    </div>
+
+    <!-- Nội dung chương truyện -->
+    <div class="content"><%= chapter.content %></div>
+
+    <!-- Thanh chuyển chương phía dưới -->
+    <div class="nav-buttons">
+        <% if (prevChapterId) { %>
+            <a href="/chapter/<%= prevChapterId %>" class="btn">← Chương Trước</a>
+        <% } else { %>
+            <span class="btn disabled">← Chương Trước</span>
+        <% } %>
+
+        <% if (nextChapterId) { %>
+            <a href="/chapter/<%= nextChapterId %>" class="btn">Chương Sau →</a>
+        <% } else { %>
+            <span class="btn disabled">Chương Sau →</span>
+        <% } %>
+    </div>
 </body>
 </html>

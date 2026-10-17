@@ -84,9 +84,26 @@ app.get('/story/:id', (req, res) => {
 
 // Trang đọc chương truyện
 app.get('/chapter/:id', (req, res) => {
-  db.get(`SELECT * FROM chapters WHERE id = ?`, [req.params.id], (err, chapter) => {
+  const currentChapterId = parseInt(req.params.id);
+  db.get(`SELECT * FROM chapters WHERE id = ?`, [currentChapterId], (err, chapter) => {
     if (!chapter) return res.send('Không tìm thấy chương!');
-    res.render('read', { chapter });
+    db.get(
+          `SELECT id FROM chapters WHERE story_id = ? AND chapter_number < ? ORDER BY chapter_number DESC LIMIT 1`,
+          [chapter.story_id, chapter.chapter_number],
+          (err, prevChapter) => {
+            db.get(
+                      `SELECT id FROM chapters WHERE story_id = ? AND chapter_number > ? ORDER BY chapter_number ASC LIMIT 1`,
+                      [chapter.story_id, chapter.chapter_number],
+                      (err, nextChapter) => {
+                        res.render('read', {
+                            chapter,
+                                          prevChapterId: prevChapter ? prevChapter.id : null,
+                                          nextChapterId: nextChapter ? nextChapter.id : null
+                            });
+                        }
+                      );
+            }
+          );
   });
 });
 
@@ -145,6 +162,39 @@ app.post('/author/add-chapter', (req, res) => {
   db.run(`INSERT INTO chapters (story_id, chapter_number, title, content) VALUES (?, ?, ?, ?)`, [story_id, chapter_number, title, content], (err) => {
     res.redirect('/story/' + story_id);
   });
+});
+
+// 1. Hiển thị trang form chỉnh sửa chương
+app.get('/author/edit-chapter/:id', (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+
+  const chapterId = req.params.id;
+  db.get(`SELECT * FROM chapters WHERE id = ?`, [chapterId], (err, chapter) => {
+    if (!chapter) return res.send('Không tìm thấy chương!');
+    res.render('edit-chapter', { chapter });
+  });
+});
+
+// 2. Xử lý lưu nội dung chương sau khi sửa
+app.post('/author/edit-chapter/:id', (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+
+  const chapterId = req.params.id;
+  const { chapter_number, title, content } = req.body;
+
+  db.run(
+    `UPDATE chapters SET chapter_number = ?, title = ?, content = ? WHERE id = ?`,
+    [chapter_number, title, content, chapterId],
+    (err) => {
+      if (err) return res.send('Lỗi khi cập nhật chương!');
+      // Sửa xong thì chuyển hướng về trang đọc chương
+      res.redirect('/chapter/' + chapterId);
+    }
+  );
 });
 
 // --- ROUTE ADMIN ---

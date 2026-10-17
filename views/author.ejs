@@ -5,11 +5,32 @@
     <a href="/">← Trang chủ</a>
     <h2>Khu Vực Dành Cho Tác Giả</h2>
 
-    <h3>Đăng Truyện Mới:</h3>
-    <form method="POST" action="/author/add-story">
-        <div>Tên truyện: <br><input type="text" name="title" required style="width: 300px;"></div><br>
-        <div>Mô tả ngắn: <br><textarea name="description" rows="4" style="width: 300px;" required></textarea></div><br>
-        <button type="submit">Đăng Truyện</button>
+    <h3>Đăng Truyện Mới</h3>
+    <form method="POST" action="/author/create-story">
+        <div>
+            <label>Tiêu đề truyện:</label><br>
+            <input type="text" name="title" required style="width: 100%; padding: 8px;">
+        </div><br>
+
+        <div>
+            <label>Thể loại:</label><br>
+            <select name="category" style="width: 100%; padding: 8px;">
+                <option value="Tiên Hiệp">Tiên Hiệp</option>
+                <option value="Kiếm Hiệp">Kiếm Hiệp</option>
+                <option value="Ngôn Tình">Ngôn Tình</option>
+                <option value="Đô Thị">Đô Thị</option>
+                <option value="Kinh Dị">Kinh Dị</option>
+                <option value="Khoa Học Viễn Tưởng">Khoa Học Viễn Tưởng</option>
+                <option value="Hành Động">Hành Động</option>
+            </select>
+        </div><br>
+
+        <div>
+            <label>Mô tả ngắn:</label><br>
+            <textarea name="description" rows="4" style="width: 100%; padding: 8px;" required></textarea>
+        </div><br>
+
+        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">Đăng Truyện</button>
     </form>
 
     <hr>

@@ -38,6 +38,7 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     description TEXT,
+    category TEXT DEFAULT 'Khác',
     author_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
@@ -155,18 +156,20 @@ app.get('/author', (req, res) => {
 });
 
 // 2. Đăng bài truyện mới (Đã bao gồm Thể loại)
-app.post('/author/add-story', (req, res) => {
+app.post('/author/create-story', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
 
   const { title, description, category } = req.body;
+  const authorId = req.session.user.id;
+
   db.run(
     `INSERT INTO stories (title, description, category, author_id) VALUES (?, ?, ?, ?)`,
-    [title, description, category || 'Khác', req.session.user.id],
-    function (err) {
-      if (err) return res.send('Lỗi khi thêm truyện mới!');
-      res.redirect('/author');
+    [title, description, category || 'Khác', authorId],
+    (err) {
+      if (err) return res.send('Lỗi khi đăng truyện!');
+      res.redirect('/');
     }
   );
 });

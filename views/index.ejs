@@ -54,7 +54,10 @@
             <% stories.forEach(story => { %>
                 <div class="card">
                     <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
-                    <p>Tác giả: <b><%= story.author_name %></b></p>
+                    <p>
+                            Tác giả: <b><%= story.author_name %></b> |
+                            Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #495057;"><%= story.category || 'Khác' %></span>
+                    </p>
                     <p><%= story.description %></p>
                 </div>
             <% }) %>

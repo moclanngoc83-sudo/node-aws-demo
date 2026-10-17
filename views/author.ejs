@@ -15,15 +15,15 @@
         <div>
             <label>Thể loại:</label><br>
             <select name="category" style="width: 100%; padding: 8px;">
-                <option value="Tiên Hiệp">Tiên Hiệp</option>
-                <option value="Kiếm Hiệp">Kiếm Hiệp</option>
-                <option value="Ngôn Tình">Ngôn Tình</option>
-                <option value="Đô Thị">Đô Thị</option>
-                <option value="Kinh Dị">Kinh Dị</option>
-                <option value="Khoa Học Viễn Tưởng">Khoa Học Viễn Tưởng</option>
-                <option value="Hành Động">Hành Động</option>
+                <% if (categories && categories.length > 0) { %>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.name %>"><%= cat.name %></option>
+                    <% }) %>
+                <% } else { %>
+                    <option value="Khác">Khác</option>
+                <% } %>
             </select>
-        </div><br>
+        </div>
 
         <div>
             <label>Mô tả ngắn:</label><br>

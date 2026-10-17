@@ -81,35 +81,43 @@ app.use((req, res, next) => {
 
 // Trang chủ danh sách truyện
 // Trang chủ: Hiển thị danh sách truyện (có lọc theo thể loại)
+// Trang chủ: Hiển thị danh sách truyện (Tìm kiếm + Lọc thể loại)
 app.get('/', (req, res) => {
-  const selectedCategory = req.query.category; // Lấy thể loại từ URL (nếu có)
+  const selectedCategory = req.query.category;
+  const searchQuery = req.query.search ? req.query.search.trim() : '';
 
   let sql = `SELECT stories.*, users.username AS author_name
              FROM stories
-             JOIN users ON stories.author_id = users.id`;
+             JOIN users ON stories.author_id = users.id
+             WHERE 1=1`;
   let params = [];
 
-  // Nếu người dùng chọn một thể loại cụ thể
+  // 1. Lọc theo thể loại nếu người dùng chọn
   if (selectedCategory && selectedCategory !== 'All') {
-    sql += ` WHERE stories.category = ?`;
+    sql += ` AND stories.category = ?`;
     params.push(selectedCategory);
+  }
+
+  // 2. Tìm kiếm theo tên truyện (không phân biệt hoa/thường)
+  if (searchQuery !== '') {
+    sql += ` AND stories.title LIKE ?`;
+    params.push(`%${searchQuery}%`);
   }
 
   sql += ` ORDER BY stories.id DESC`;
 
-  // 1. Lấy danh sách truyện
+  // Lấy danh sách truyện và danh sách thể loại
   db.all(sql, params, (err, stories) => {
-    // 2. Lấy tất cả thể loại để hiển thị menu lọc
     db.all(`SELECT * FROM categories`, [], (err, categories) => {
       res.render('index', {
         stories: stories || [],
         categories: categories || [],
-        selectedCategory: selectedCategory || 'All'
+        selectedCategory: selectedCategory || 'All',
+        searchQuery
       });
     });
   });
 });
-
 // Chi tiết truyện & Danh sách chương
 app.get('/story/:id', (req, res) => {
   const storyId = req.params.id;

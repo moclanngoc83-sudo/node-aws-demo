@@ -50,17 +50,33 @@
     <div class="container">
         <h2>Danh Sách Truyện Mới Cập Nhật</h2>
 
-        <!-- Thanh lọc theo Thể loại -->
-        <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <b>Lọc theo Thể loại: </b>
-            <a href="/" style="margin-right: 10px; font-weight: <%= selectedCategory === 'All' ? 'bold' : 'normal' %>;">Tất cả</a>
+        <!-- Ô Tìm kiếm & Thanh Lọc Thể loại -->
+        <div style="background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;">
 
-            <% categories.forEach(cat => { %>
-                <a href="/?category=<%= encodeURIComponent(cat.name) %>"
-                   style="margin-right: 10px; font-weight: <%= selectedCategory === cat.name ? 'bold' : 'normal' %>; color: <%= selectedCategory === cat.name ? '#007bff' : '#333' %>;">
-                    <%= cat.name %>
-                </a>
-            <% }) %>
+            <!-- Form Tìm Kiếm -->
+            <form method="GET" action="/" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <% if (selectedCategory && selectedCategory !== 'All') { %>
+                    <input type="hidden" name="category" value="<%= selectedCategory %>">
+                <% } %>
+                <input type="text" name="search" value="<%= searchQuery %>" placeholder="Nhập tên truyện cần tìm..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
+                <button type="submit" style="background: #007bff; color: white; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">Tìm kiếm</button>
+                <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
+                    <a href="/" style="padding: 8px 12px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">Bỏ lọc</a>
+                <% } %>
+            </form>
+
+            <!-- Danh sách Thể loại -->
+            <div style="font-size: 14px;">
+                <b>Thể loại: </b>
+                <a href="/?search=<%= encodeURIComponent(searchQuery) %>" style="margin-right: 10px; font-weight: <%= selectedCategory === 'All' ? 'bold' : 'normal' %>;">Tất cả</a>
+
+                <% categories.forEach(cat => { %>
+                    <a href="/?category=<%= encodeURIComponent(cat.name) %>&search=<%= encodeURIComponent(searchQuery) %>"
+                       style="margin-right: 10px; font-weight: <%= selectedCategory === cat.name ? 'bold' : 'normal' %>; color: <%= selectedCategory === cat.name ? '#007bff' : '#333' %>;">
+                        <%= cat.name %>
+                    </a>
+                <% }) %>
+            </div>
         </div>
 
         <!-- Danh sách truyện -->
@@ -77,7 +93,7 @@
             <% }) %>
         <% } else { %>
             <div class="card">
-                <p>Không có bộ truyện nào thuộc thể loại này.</p>
+                <p>Không tìm thấy bộ truyện nào phù hợp với từ khóa/thể loại đã chọn.</p>
             </div>
         <% } %>
     </div>

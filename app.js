@@ -213,3 +213,22 @@ app.get('/admin', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server web đọc truyện đang chạy tại port ${PORT}`);
 });
+
+// Route cho phép người dùng đang đăng nhập (User, Author, Admin) tự xóa tài khoản của mình
+app.post('/user/delete-own-account', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send('Bạn cần đăng nhập để thực hiện thao tác này!');
+  }
+
+  const userId = req.session.user.id;
+
+  // Xóa tài khoản khỏi CSDL
+  db.run(`DELETE FROM users WHERE id = ?`, [userId], (err) => {
+    if (err) return res.send('Lỗi khi xóa tài khoản!');
+
+    // Xóa session đăng nhập và quay về trang chủ
+    req.session.destroy(() => {
+      res.redirect('/');
+    });
+  });
+});

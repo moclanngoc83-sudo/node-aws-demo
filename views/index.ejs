@@ -35,5 +35,24 @@
             </div>
         <% }) %>
     </div>
+
+    <div class="nav">
+        <a href="/"><b>Trang Chủ</b></a>
+        <% if (user) { %>
+            <span>Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
+            <% if (user.role === 'author' || user.role === 'admin') { %><a href="/author">Khu vực Tác Giả</a><% } %>
+            <% if (user.role === 'admin') { %><a href="/admin">Khu vực Admin</a><% } %>
+
+            <!-- Nút tự xóa tài khoản dành cho cả User, Author và Admin -->
+            <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
+                <button type="submit" style="background:red; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">Xóa Tài Khoản</button>
+            </form>
+
+            <a href="/logout">Đăng Xuất</a>
+        <% } else { %>
+            <a href="/login">Đăng Nhập</a>
+            <a href="/register">Đăng Ký</a>
+        <% } %>
+    </div>
 </body>
 </html>

@@ -50,20 +50,34 @@
     <div class="container">
         <h2>Danh Sách Truyện Mới Cập Nhật</h2>
 
+        <!-- Thanh lọc theo Thể loại -->
+        <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <b>Lọc theo Thể loại: </b>
+            <a href="/" style="margin-right: 10px; font-weight: <%= selectedCategory === 'All' ? 'bold' : 'normal' %>;">Tất cả</a>
+
+            <% categories.forEach(cat => { %>
+                <a href="/?category=<%= encodeURIComponent(cat.name) %>"
+                   style="margin-right: 10px; font-weight: <%= selectedCategory === cat.name ? 'bold' : 'normal' %>; color: <%= selectedCategory === cat.name ? '#007bff' : '#333' %>;">
+                    <%= cat.name %>
+                </a>
+            <% }) %>
+        </div>
+
+        <!-- Danh sách truyện -->
         <% if (stories && stories.length > 0) { %>
             <% stories.forEach(story => { %>
                 <div class="card">
                     <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
                     <p>
-                            Tác giả: <b><%= story.author_name %></b> |
-                            Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #495057;"><%= story.category || 'Khác' %></span>
+                        Tác giả: <b><%= story.author_name %></b> |
+                        Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold;"><%= story.category || 'Khác' %></span>
                     </p>
                     <p><%= story.description %></p>
                 </div>
             <% }) %>
         <% } else { %>
             <div class="card">
-                <p>Chưa có bộ truyện nào được đăng. Hãy đăng nhập tài khoản Tác giả/Admin để đăng bài nhé!</p>
+                <p>Không có bộ truyện nào thuộc thể loại này.</p>
             </div>
         <% } %>
     </div>

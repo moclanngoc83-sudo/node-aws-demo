@@ -80,9 +80,33 @@ app.use((req, res, next) => {
 // --- ROUTE TRANG CHỦ & ĐỌC TRUYỆN ---
 
 // Trang chủ danh sách truyện
+// Trang chủ: Hiển thị danh sách truyện (có lọc theo thể loại)
 app.get('/', (req, res) => {
-  db.all(`SELECT stories.*, users.username as author_name FROM stories JOIN users ON stories.author_id = users.id`, [], (err, stories) => {
-    res.render('index', { stories: stories || [] });
+  const selectedCategory = req.query.category; // Lấy thể loại từ URL (nếu có)
+
+  let sql = `SELECT stories.*, users.username AS author_name
+             FROM stories
+             JOIN users ON stories.author_id = users.id`;
+  let params = [];
+
+  // Nếu người dùng chọn một thể loại cụ thể
+  if (selectedCategory && selectedCategory !== 'All') {
+    sql += ` WHERE stories.category = ?`;
+    params.push(selectedCategory);
+  }
+
+  sql += ` ORDER BY stories.id DESC`;
+
+  // 1. Lấy danh sách truyện
+  db.all(sql, params, (err, stories) => {
+    // 2. Lấy tất cả thể loại để hiển thị menu lọc
+    db.all(`SELECT * FROM categories`, [], (err, categories) => {
+      res.render('index', {
+        stories: stories || [],
+        categories: categories || [],
+        selectedCategory: selectedCategory || 'All'
+      });
+    });
   });
 });
 

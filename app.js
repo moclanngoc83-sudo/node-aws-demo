@@ -42,6 +42,8 @@ db.serialize(() => {
     author_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`ALTER TABLE stories ADD COLUMN category TEXT DEFAULT 'Khác'`, (err) => {
+  });
 
   // Bảng Chapters (Chương)
   db.run(`CREATE TABLE IF NOT EXISTS chapters (

@@ -25,13 +25,11 @@
         <div class="form-group">
             <label>Thể loại:</label>
             <select name="category">
-                <option value="Tiên Hiệp" <%= story.category === 'Tiên Hiệp' ? 'selected' : '' %>>Tiên Hiệp</option>
-                <option value="Kiếm Hiệp" <%= story.category === 'Kiếm Hiệp' ? 'selected' : '' %>>Kiếm Hiệp</option>
-                <option value="Ngôn Tình" <%= story.category === 'Ngôn Tình' ? 'selected' : '' %>>Ngôn Tình</option>
-                <option value="Đô Thị" <%= story.category === 'Đô Thị' ? 'selected' : '' %>>Đô Thị</option>
-                <option value="Kinh Dị" <%= story.category === 'Kinh Dị' ? 'selected' : '' %>>Kinh Dị</option>
-                <option value="Khoa Học Viễn Tưởng" <%= story.category === 'Khoa Học Viễn Tưởng' ? 'selected' : '' %>>Khoa Học Viễn Tưởng</option>
-                <option value="Hành Động" <%= story.category === 'Hành Động' ? 'selected' : '' %>>Hành Động</option>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat.name %>" <%= story.category === cat.name ? 'selected' : '' %>>
+                        <%= cat.name %>
+                    </option>
+                <% }) %>
             </select>
         </div>
 

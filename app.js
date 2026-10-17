@@ -54,6 +54,18 @@ db.serialize(() => {
     content TEXT
   )`);
 
+  // Bảng Danh mục / Thể loại truyện
+  db.run(`CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE
+  )`, () => {
+    // Chèn sẵn danh sách thể loại mặc định nếu bảng chưa có dữ liệu
+    const defaultCategories = ['Tiên Hiệp', 'Kiếm Hiệp', 'Ngôn Tình', 'Đô Thị', 'Kinh Dị', 'Khoa Học Viễn Tưởng', 'Hành Động'];
+    defaultCategories.forEach(cat => {
+      db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [cat]);
+    });
+  });
+
   // Tạo tài khoản Admin mặc định (admin / admin123)
   const defaultAdminPass = bcrypt.hashSync('admin123', 10);
   db.run(`INSERT OR IGNORE INTO users (id, username, password, role) VALUES (1, 'admin', ?, 'admin')`, [defaultAdminPass]);
@@ -148,14 +160,18 @@ app.get('/logout', (req, res) => {
 // 1. Trang quản lý tác giả (Xem danh sách truyện đã đăng)
 app.get('/author', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
-    return res.status(403).send('Quyền truy cập bị từ chối! Bạn cần tài khoản Tác giả.');
+    return res.status(403).send('Quyền truy cập bị từ chối!');
   }
 
   db.all(`SELECT * FROM stories WHERE author_id = ?`, [req.session.user.id], (err, stories) => {
-    res.render('author', { stories: stories || [] });
+    db.all(`SELECT * FROM categories`, [], (err, categories) => {
+      res.render('author', {
+        stories: stories || [],
+        categories: categories || []
+      });
+    });
   });
 });
-
 // 2. Đăng bài truyện mới (Đã bao gồm Thể loại)
 app.post('/author/add-story', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
@@ -231,7 +247,14 @@ app.get('/author/edit-story/:id', (req, res) => {
   const storyId = req.params.id;
   db.get(`SELECT * FROM stories WHERE id = ?`, [storyId], (err, story) => {
     if (!story) return res.send('Không tìm thấy truyện!');
-    res.render('edit-story', { story });
+
+    // Lấy danh sách thể loại từ CSDL
+    db.all(`SELECT * FROM categories`, [], (err, categories) => {
+      res.render('edit-story', {
+        story,
+        categories: categories || []
+      });
+    });
   });
 });
 
@@ -286,5 +309,33 @@ app.post('/user/delete-own-account', (req, res) => {
     req.session.destroy(() => {
       res.redirect('/');
     });
+  });
+});
+
+// 1. Route Admin xem danh sách thể loại và form thêm thể loại
+app.get('/admin/categories', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Chỉ Admin mới có quyền quản lý thể loại!');
+  }
+
+  db.all(`SELECT * FROM categories`, [], (err, categories) => {
+    res.render('admin-categories', { categories: categories || [] });
+  });
+});
+
+// 2. Route Xử lý thêm thể loại mới
+app.post('/admin/add-category', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+
+  const { category_name } = req.body;
+  if (!category_name || category_name.trim() === '') {
+    return res.send('Tên thể loại không được để trống!');
+  }
+
+  db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [category_name.trim()], (err) => {
+    if (err) return res.send('Lỗi khi thêm thể loại!');
+    res.redirect('/admin/categories');
   });
 });

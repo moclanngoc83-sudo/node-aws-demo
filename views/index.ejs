@@ -4,42 +4,66 @@
     <meta charset="UTF-8">
     <title>Web Đọc Truyện Online</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f6f9; }
-        .nav { background: #333; padding: 10px; color: white; display: flex; gap: 15px; }
-        .nav a { color: white; text-decoration: none; }
-        .container { max-width: 900px; margin: 20px auto; }
-        .card{ background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
+        .nav { background: #333; padding: 12px 20px; color: white; display: flex; align-items: center; gap: 15px; }
+        .nav a { color: white; text-decoration: none; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+        .card h3 { margin-top: 0; }
+        .card h3 a { color: #007bff; text-decoration: none; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; }
     </style>
 </head>
 <body>
+
+    <!-- Chỉ duy nhất 1 thanh Navigation -->
     <div class="nav">
-            <a href="/"><b>Trang Chủ</b></a>
-            <% if (user) { %>
-                <span>Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
-                <% if (user.role === 'author' || user.role === 'admin') { %><a href="/author">Khu vực Tác Giả</a><% } %>
-                <% if (user.role === 'admin') { %><a href="/admin">Khu vực Admin</a><% } %>
+        <a href="/"><b>Trang Chủ</b></a>
 
-                <!-- Nút tự xóa tài khoản dành cho cả User, Author và Admin -->
-                <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
-                    <button type="submit" style="background:red; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">Xóa Tài Khoản</button>
-                </form>
+        <% if (user) { %>
+            <span>Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
 
-                <a href="/logout">Đăng Xuất</a>
-            <% } else { %>
-                <a href="/login">Đăng Nhập</a>
-                <a href="/register">Đăng Ký</a>
+            <% if (user.role === 'author' || user.role === 'admin') { %>
+                <a href="/author">Khu vực Tác Giả</a>
             <% } %>
-        </div>
 
+            <% if (user.role === 'admin') { %>
+                <a href="/admin">Khu vực Admin</a>
+            <% } %>
+
+            <!-- Nút tự xóa tài khoản cá nhân -->
+            <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
+                <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
+            </form>
+
+            <a href="/logout" style="margin-left: auto;">Đăng Xuất</a>
+        <% } else { %>
+            <div style="margin-left: auto;">
+                <a href="/login" style="margin-right: 10px;">Đăng Nhập</a>
+                <a href="/register">Đăng Ký</a>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Nội dung chính -->
     <div class="container">
         <h2>Danh Sách Truyện Mới Cập Nhật</h2>
-        <% stories.forEach(story => { %>
+
+        <% if (stories && stories.length > 0) { %>
+            <% stories.forEach(story => { %>
+                <div class="card">
+                    <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
+                    <p>Tác giả: <b><%= story.author_name %></b></p>
+                    <p><%= story.description %></p>
+                </div>
+            <% }) %>
+        <% } else { %>
             <div class="card">
-                <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
-                <p>Tác giả: <b><%= story.author_name %></b></p>
-                <p><%= story.description %></p>
+                <p>Chưa có bộ truyện nào được đăng. Hãy đăng nhập tài khoản Tác giả/Admin để đăng bài nhé!</p>
             </div>
-        <% }) %>
+        <% } %>
     </div>
+
 </body>
 </html>

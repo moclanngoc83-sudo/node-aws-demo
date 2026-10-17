@@ -1,45 +1,62 @@
 <!DOCTYPE html>
-<html>
-<head><title><%= story.title %></title></head>
-<body style="font-family: Arial; padding: 20px;">
-    <a href="/">← Quay lại Trang chủ</a>
-    <h1><%= story.title %></h1>
-    <p><b>Tác giả:</b> <%= story.author_name %></p>
-    <p><%= story.description %></p>
-    <hr>
-    <h3>Danh Sách Chương:</h3>
-    <ul>
-        <% chapters.forEach(chap => { %>
-            <li>
-                <a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%= chap.title %></a>
-                <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
-                    — <a href="/author/edit-chapter/<%= chap.id %>" style="color: #007bff;">[Sửa]</a>
-                <% } %>
-            </li>
-        <% }) %>
-    </ul>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title><%= story.title %></title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; background: #f9f9f9; color: #333; }
+        .back-link { text-decoration: none; color: #007bff; font-weight: bold; }
+        .story-header { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 15px; }
+        .chapter-list { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 20px; }
+        .chapter-list ul { list-style: none; padding: 0; }
+        .chapter-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .chapter-list li:last-child { border-bottom: none; }
+        .chapter-list a { text-decoration: none; color: #333; font-weight: bold; }
+        .chapter-list a:hover { color: #007bff; }
+        .badge { background: #e9ecef; padding: 3px 8px; border-radius: 4px; font-size: 14px; color: #495057; font-weight: bold; }
+        .btn-link { color: #007bff; text-decoration: none; font-weight: bold; margin-left: 5px; }
+        .btn-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
 
-    <h2><%= story.title %></h2>
-    <p>
-        Tác giả: <b><%= story.author_name %></b> |
-        Thể loại: <b><%= story.category || 'Khác' %></b>
+    <a href="/" class="back-link">← Quay lại Trang chủ</a>
 
-        <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
-            — <a href="/author/edit-story/<%= story.id %>" style="color: #007bff; font-weight: bold;">[Sửa Thông Tin Truyện]</a>
+    <!-- Khối thông tin chi tiết bộ truyện -->
+    <div class="story-header">
+        <h1 style="margin-top: 0;"><%= story.title %></h1>
+
+        <p>
+            Tác giả: <b><%= story.author_name %></b> |
+            Thể loại: <span class="badge"><%= story.category || 'Khác' %></span>
+
+            <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
+                — <a href="/author/edit-story/<%= story.id %>" class="btn-link">[Sửa Thông Tin Truyện]</a>
+            <% } %>
+        </p>
+
+        <p><b>Mô tả:</b> <%= story.description %></p>
+    </div>
+
+    <!-- Khối danh sách chương -->
+    <div class="chapter-list">
+        <h3>Danh Sách Chương:</h3>
+
+        <% if (chapters && chapters.length > 0) { %>
+            <ul>
+                <% chapters.forEach(chap => { %>
+                    <li>
+                        <a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%= chap.title %></a>
+                        <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
+                            — <a href="/author/edit-chapter/<%= chap.id %>" class="btn-link">[Sửa]</a>
+                        <% } %>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>Truyện này chưa có chương nào.</p>
         <% } %>
-    </p>
-    <p><b>Mô tả:</b> <%= story.description %></p>
+    </div>
 
-<% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
-    <hr>
-    <h3> Đăng chương mới:</h3>
-    <form method="POST" action="/author/add-chapter">
-        <input type="hidden" name="story_id" value="<%= story.id %>">
-        <div>Số chương: <input type="number" name="chapter_number" required></div><br>
-        <div>Tên chương: <input type="text" name="title" required></div><br>
-        <div>Nội dung chương: <br><textarea name="content" rows="10" cols="60" required></textarea></div><br>
-        <button type="submit">Đăng</button>
-    </form>
-    <% } %>
 </body>
 </html>

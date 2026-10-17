@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title><%= story.title %></title></head>
+<body style="font-family: Arial; padding: 20px;">
+    <a href="/">← Quay lại Trang chủ</a>
+    <h1><%= story.title %></h1>
+    <p><b>Tác giả:</b> <%= story.author_name %></p>
+    <p><%= story.description %></p>
+    <hr>
+    <h3>Danh Sách Chương:</h3>
+    <ul>
+        <% chapters.forEach(chap => { %>
+            <li><a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%=chap.title %></a></li>
+        <% }) %>
+    </ul>
+
+<% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
+    <hr>
+    <h3> Đăng chương mới:</h3>
+    <form method="POST" action="/author/add-chapter">
+        <input type="hidden" name="story_id" value="<%= story.id %>">
+        <div>Số chương: <input type="number" name="chapter_number" required></div><br>
+        <div>Tên chương: <input type="text" name="title" required></div><br>
+        <div>Nội dung chương: <br><textarea name="content" rows="10" cols="60" required></textarea></div><br>
+        <button type="submit">Đăng</button>
+    </form>
+    <% } %>
+</body>
+</html>

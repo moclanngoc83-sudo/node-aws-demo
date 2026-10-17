@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Trang Quản Trị Admin</title></head>
+<body style="font-family: Arial; padding: 20px;">
+    <a href="/">← Trang chủ</a>
+    <h2>Bảng Điều Khiển Quản Trị Viên (Admin)</h2>
+
+    <h3>Danh Sách Tài Khoản Hệ Thống:</h3>
+    <table border="1" cellpadding="8" style="border-collapse: collapse;">
+        <tr><th>ID</th><th>Username</th><th>Vai trò</th></tr>
+        <% users.forEach(u => { %>
+            <tr><td><%= u.id %></td><td><%= u.username %></td><td><b><%= u.role %></b></td></tr>
+        <% }) %>
+    </table>
+
+    <h3>Tất Cả Truyện Trên Hệ Thống:</h3>
+    <ul>
+        <% stories.forEach(s => { %>
+            <li><b><%= s.title %></b> (Đăng bởi: <%= s.author_name %>) - <a href="/story/<%= s.id %>">Xem</a></li>
+        <% }) %>
+    </ul>
+</body>
+</html>

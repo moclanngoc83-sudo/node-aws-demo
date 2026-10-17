@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Quản Lý Tác Giả</title></head>
+<body style="font-family: Arial; padding: 20px;">
+    <a href="/">← Trang chủ</a>
+    <h2>Khu Vực Dành Cho Tác Giả</h2>
+
+    <h3>Đăng Truyện Mới:</h3>
+    <form method="POST" action="/author/add-story">
+        <div>Tên truyện: <br><input type="text" name="title" required style="width: 300px;"></div><br>
+        <div>Mô tả ngắn: <br><textarea name="description" rows="4" style="width: 300px;" required></textarea></div><br>
+        <button type="submit">Đăng Truyện</button>
+    </form>
+
+    <hr>
+    <h3>Truyện Đã Đăng Của Tôi:</h3>
+    <ul>
+        <% stories.forEach(s => { %>
+            <li><b><%= s.title %></b> - <a href="/story/<%= s.id %>">Quản lý chương</a></li>
+        <% }) %>
+    </ul>
+</body>
+</html>

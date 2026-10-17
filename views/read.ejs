@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head><title>Chương <%= chapter.chapter_number %>: <%= chapter.title %></title></head>
+<body style="font-family: Arial; max-width: 800px; margin: auto; padding: 20px; line-height: 1.8;">
+    <a href="/story/<%= chapter.story_id %>">← Về trang chi tiết truyện</a>
+    <h2>Chương <%= chapter.chapter_number %>: <%= chapter.title %></h2>
+    <hr>
+    <div style="white-space: pre-wrap; font-size: 18px;"><%= chapter.content %></div>
+</body>
+</html>

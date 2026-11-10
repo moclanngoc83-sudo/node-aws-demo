@@ -4,15 +4,93 @@
     <meta charset="UTF-8">
     <title>Web Đọc Truyện Online</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-        .nav { background: #333; padding: 12px 20px; color: white; display: flex; align-items: center; gap: 15px; }
-        .nav a { color: white; text-decoration: none; font-weight: 500; }
-        .nav a:hover { text-decoration: underline; }
-        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-        .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
-        .card h3 { margin-top: 0; }
-        .card h3 a { color: #007bff; text-decoration: none; }
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        /* Thanh Menu top */
+        .nav {
+            background: #1e293b;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .nav a { color: #f8fafc; text-decoration: none; font-weight: 600; font-size: 15px; transition: color 0.2s; }
+        .nav a:hover { color: #38bdf8; }
+
+        .container { max-width: 960px; margin: 30px auto; padding: 0 20px; }
+
+        /* Khung Tìm kiếm & Lọc */
+        .filter-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        .search-input {
+            flex: 1; padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px; outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: #0284c7; }
+        .btn-search {
+            background: #0284c7; color: white;
+            border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer;
+            font-weight: 600; transition: background 0.2s;
+        }
+        .btn-search:hover { background: #0369a1; }
+
+        /* Thẻ Nhãn Thể loại */
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            margin: 4px;
+            border-radius: 20px;
+            background: #f1f5f9;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .category-badge:hover, .category-badge.active {
+            background: #0284c7; color: white;
+        }
+
+        /* Card bộ truyện */
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 { margin: 0 0 8px 0; }
+        .card h3 a { color: #0f172a; text-decoration: none; font-size: 20px; }
+        .card h3 a:hover { color: #0284c7; }
+        .card-meta { font-size: 14px; color: #64748b; margin-bottom: 12px; }
+
+        /* Nút Xóa */
+        .btn-delete {
+            background: #ef4444; color: white;
+            border: none; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 600;
+        }
     </style>
 </head>
 <body>

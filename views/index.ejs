@@ -145,13 +145,20 @@
             </form>
 
             <!-- Danh sách Thể loại -->
-            <div style="font-size: 14px;">
+            <!-- Danh sách Thể loại -->
+            <div style="font-size: 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
                 <b>Thể loại: </b>
-                <a href="/?search=<%= encodeURIComponent(searchQuery) %>" style="margin-right: 10px; font-weight: <%= selectedCategory === 'All' ? 'bold' : 'normal' %>;">Tất cả</a>
 
+                <!-- Link "Tất cả" -->
+                <a href="/?search=<%= encodeURIComponent(searchQuery) %>"
+                   class="category-badge <%= selectedCategory === 'All' ? 'active' : '' %>">
+                    Tất cả
+                </a>
+
+                <!-- Vòng lặp danh sách Thể loại -->
                 <% categories.forEach(cat => { %>
                     <a href="/?category=<%= encodeURIComponent(cat.name) %>&search=<%= encodeURIComponent(searchQuery) %>"
-                       style="margin-right: 10px; font-weight: <%= selectedCategory === cat.name ? 'bold' : 'normal' %>; color: <%= selectedCategory === cat.name ? '#007bff' : '#333' %>;">
+                       class="category-badge <%= selectedCategory === cat.name ? 'active' : '' %>">
                         <%= cat.name %>
                     </a>
                 <% }) %>

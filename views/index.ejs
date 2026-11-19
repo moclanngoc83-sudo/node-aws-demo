@@ -23,15 +23,19 @@
             position: relative;
             z-index: 1000;
         }
-        .nav a { color: #f8fafc; text-decoration: none; font-weight: 600; font-size: 15px; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
-        .nav a:hover, .dropdown-trigger:hover { color: #035935; }
+        .nav a { color: #f8fafc; text-decoration: none; font-weight: bold; font-size: 15px; transition: color 0.2s; cursor: pointer; display: inline-block; padding: 6px 0; }
+        .nav a:hover, .dropdown:hover .dropdown-trigger { color: #035935; }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
         /* --- MEGA MENU THỂ LOẠI --- */
         .mega-menu{
             display: none;
             position: absolute;
             top: 100%;
-            left: 24px;
+            left: -20px;
             width: 780px;
             max-width: calc(100vw - 48px);
             background: rgba(18, 28, 24, 0.94);
@@ -42,6 +46,10 @@
             color: #ffffff;
             margin-top: 8px;
             z-index: 999;
+        }
+        .dropdown:hover .mega-menu {
+            display: block;
+            animation: fadeInDown 0.2s ease;
         }
         .mega-menu.show {
             display: block;
@@ -151,36 +159,11 @@
         <div class="nav">
             <a href="/"><b>Trang Chủ</b></a>
 
-            <!-- Nút bấm mở bảng Thể loại -->
-            <button type="button" class="dropdown-trigger" id="categoryBtn">
-                Thể loại ▾
-            </button>
+    <!-- Cụm Thể loại tự động xổ popup khi rê chuột -->
+        <div class="dropdown">
+            <span class="dropdown-trigger">Thể loại ▾</span>
 
-            <% if (user) { %>
-                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
-
-                <% if (user.role === 'author' || user.role === 'admin') { %>
-                    <a href="/author">Khu vực Tác Giả</a>
-                <% } %>
-
-                <% if (user.role === 'admin') { %>
-                    <a href="/admin">Khu vực Admin</a>
-                <% } %>
-
-                <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
-                    <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
-                </form>
-
-                <a href="/logout" style="margin-left: auto;">Đăng Xuất</a>
-            <% } else { %>
-                <div style="margin-left: auto;">
-                    <a href="/login" style="margin-right: 12px;">Đăng Nhập</a>
-                    <a href="/register">Đăng Ký</a>
-                </div>
-            <% } %>
-
-            <!-- Bảng Mega Menu xổ xuống khi bấm vào "Thể loại ▾" -->
-            <div class="mega-menu" id="categoryMenu">
+            <div class="mega-menu">
                 <h4 class="mega-menu-title">Danh Mục Thể Loại Truyện</h4>
                 <div class="mega-grid">
                     <a href="/?search=<%= encodeURIComponent(searchQuery) %>" class="<%= selectedCategory === 'All' ? 'active' : '' %>">
@@ -196,6 +179,7 @@
             </div>
         </div>
 
+        <% if (user) { %>
         <!-- Nội dung chính -->
         <div class="container">
             <h2>
@@ -237,25 +221,5 @@
                 </div>
             <% } %>
         </div>
-
-        <!-- Script xử lý đóng/mở bảng Thể loại -->
-        <script>
-            const categoryBtn = document.getElementById('categoryBtn');
-            const categoryMenu = document.getElementById('categoryMenu');
-
-            // Bấm vào nút "Thể loại ▾" để bật/tắt bảng
-            categoryBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                categoryMenu.classList.toggle('show');
-            });
-
-            // Bấm ra vùng trống bên ngoài thì tự đóng bảng lại
-            document.addEventListener('click', function(e) {
-                if (!categoryMenu.contains(e.target) && e.target !== categoryBtn) {
-                    categoryMenu.classList.remove('show');
-                }
-            });
-        </script>
-
     </body>
     </html>

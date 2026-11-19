@@ -15,16 +15,17 @@
         /* Thanh Menu top */
         .nav {
             background: #78cfa0;
-            padding: 14px 24px;
+            padding: 12px 24px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             position: relative;
             z-index: 1000;
+            flex-wrap: wrap;
         }
 
-        /* Chữ trên thanh Menu (Đồng bộ Trang Chủ & Thể loại) */
+        /* Chữ trên thanh Menu */
         .nav a, .dropdown-trigger {
             color: #f8fafc;
             text-decoration: none;
@@ -36,18 +37,77 @@
             padding: 6px 0;
         }
 
-        /* Đổi màu chữ sang xanh đậm khi rê chuột vào */
-        .nav a:hover, .dropdown:hover .dropdown-trigger {
+        /* Đổi sang xanh đậm khi di chuột hoặc ấn giữ */
+        .nav a:hover, .nav a:active,
+        .dropdown:hover .dropdown-trigger, .dropdown-trigger:active {
             color: #035935;
         }
 
-        /* Vùng bọc Dropdown để nhận sự kiện hover */
+        /* --- THANH TÌM KIẾM TRÊN MENU BAR --- */
+        .nav-search-form {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 10px;
+            flex: 1;
+            max-width: 380px;
+        }
+        .nav-search-input {
+            width: 100%;
+            padding: 7px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #0f172a;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .nav-search-input:focus {
+            background: #ffffff;
+            border-color: #035935;
+            box-shadow: 0 0 0 2px rgba(3, 89, 53, 0.2);
+        }
+        .nav-btn-search {
+            background: #318c5b;
+            color: #ffffff;
+            border: none;
+            padding: 7px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        /* Hiệu ứng chữ chuyển xanh đậm khi di chuột / ấn vào */
+        .nav-btn-search:hover, .nav-btn-search:active {
+            background: #ffffff;
+            color: #035935;
+        }
+        .nav-btn-clear {
+            background: rgba(15, 23, 42, 0.35);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .nav-btn-clear:hover {
+            background: #ffffff;
+            color: #035935;
+        }
+
+        /* Vùng bọc Dropdown Thể loại */
         .dropdown {
             position: relative;
             display: inline-block;
         }
 
-        /* --- MEGA MENU THỂ LOẠI (Tự hiện khi hover) --- */
+        /* --- MEGA MENU THỂ LOẠI --- */
         .mega-menu {
             display: none;
             position: absolute;
@@ -63,18 +123,14 @@
             color: #ffffff;
             z-index: 999;
         }
-
-        /* Rê chuột vào vùng .dropdown thì tự động bật bảng .mega-menu */
         .dropdown:hover .mega-menu {
             display: block;
             animation: fadeInDown 0.2s ease;
         }
-
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .mega-menu-title {
             margin: 0 0 18px 0;
             font-size: 18px;
@@ -83,8 +139,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             padding-bottom: 12px;
         }
-
-        /* Chia lưới 4 cột */
         .mega-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -110,41 +164,6 @@
         }
 
         .container { max-width: 960px; margin: 30px auto; padding: 0 20px; }
-
-        /* Khung Tìm kiếm */
-        .filter-box {
-            background: white;
-            padding: 18px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            margin-bottom: 25px;
-        }
-        .search-input {
-            flex: 1; padding: 10px 14px;
-            background-color: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 15px; outline: none;
-            transition: border-color 0.2s;
-        }
-        .search-input:focus { border-color: #035935; }
-        .btn-search {
-            background: #78cfa0; color: white;
-            border: none; padding: 10px 20px;
-            border-radius: 6px; cursor: pointer;
-            font-weight: 600; transition: all 0.2s;
-        }
-        .btn-search:hover { background: #318c5b; color: #fef08a; }
-        .btn-search:active { background: #035935; color: #ffffff; }
-        .btn-clear {
-            padding: 10px 14px;
-            background: #64748b;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
 
         /* Card bộ truyện */
         .card {
@@ -173,11 +192,11 @@
 </head>
 <body>
 
-    <!-- Thanh Navigation -->
+    <!-- Thanh Navigation tích hợp sẵn tìm kiếm -->
     <div class="nav">
         <a href="/">Trang Chủ</a>
 
-        <!-- Cụm Thể loại tự động xổ popup khi rê chuột -->
+        <!-- Dropdown Thể loại -->
         <div class="dropdown">
             <span class="dropdown-trigger">Thể loại ▾</span>
 
@@ -197,52 +216,54 @@
             </div>
         </div>
 
-        <% if (user) { %>
-            <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
-
-            <% if (user.role === 'author' || user.role === 'admin') { %>
-                <a href="/author">Khu vực Tác Giả</a>
+        <!-- Thanh Tìm Kiếm nằm ngay trên Menu Bar -->
+        <form method="GET" action="/" class="nav-search-form">
+            <% if (selectedCategory && selectedCategory !== 'All') { %>
+                <input type="hidden" name="category" value="<%= selectedCategory %>">
             <% } %>
-
-            <% if (user.role === 'admin') { %>
-                <a href="/admin">Khu vực Admin</a>
+            <input type="text" name="search" value="<%= searchQuery %>" placeholder="Tìm tên truyện..." class="nav-search-input">
+            <button type="submit" class="nav-btn-search">Tìm kiếm</button>
+            <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
+                <a href="/" class="nav-btn-clear">Bỏ lọc</a>
             <% } %>
+        </form>
 
-            <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
-                <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
-            </form>
+        <!-- Phần tài khoản bên phải -->
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+            <% if (user) { %>
+                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
 
-            <a href="/logout" style="margin-left: auto;">Đăng Xuất</a>
-        <% } else { %>
-            <div style="margin-left: auto;">
-                <a href="/login" style="margin-right: 12px;">Đăng Nhập</a>
+                <% if (user.role === 'author' || user.role === 'admin') { %>
+                    <a href="/author">Khu vực Tác Giả</a>
+                <% } %>
+
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin">Khu vực Admin</a>
+                <% } %>
+
+                <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
+                    <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
+                </form>
+
+                <a href="/logout">Đăng Xuất</a>
+            <% } else { %>
+                <a href="/login">Đăng Nhập</a>
                 <a href="/register">Đăng Ký</a>
-            </div>
-        <% } %>
+            <% } %>
+        </div>
     </div>
 
     <!-- Nội dung chính -->
     <div class="container">
         <h2>
-            Danh Sách Truyện
+            Danh Sách Truyện Mới Cập Nhật
             <% if (selectedCategory && selectedCategory !== 'All') { %>
                 — Thể loại: <span style="color: #035935;"><%= selectedCategory %></span>
             <% } %>
+            <% if (searchQuery) { %>
+                — Từ khóa: "<span style="color: #035935;"><%= searchQuery %></span>"
+            <% } %>
         </h2>
-
-        <!-- Ô Tìm kiếm -->
-        <div class="filter-box">
-            <form method="GET" action="/" style="display: flex; gap: 10px;">
-                <% if (selectedCategory && selectedCategory !== 'All') { %>
-                    <input type="hidden" name="category" value="<%= selectedCategory %>">
-                <% } %>
-                <input type="text" name="search" value="<%= searchQuery %>" placeholder="Nhập tên truyện cần tìm..." class="search-input">
-                <button type="submit" class="btn-search">Tìm kiếm</button>
-                <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
-                    <a href="/" class="btn-clear">Bỏ lọc</a>
-                <% } %>
-            </form>
-        </div>
 
         <!-- Danh sách truyện -->
         <% if (stories && stories.length > 0) { %>

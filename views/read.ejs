@@ -2,53 +2,378 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Chương <%= chapter.chapter_number %>: <%= chapter.title %></title>
+    <title><%= chapter.title %> - Đọc Truyện Online</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.8; background: #f9f9f9; color: #333; }
-        .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
-        .btn { padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
-        .btn.disabled { background-color: #ccc; cursor: not-allowed; pointer-events: none; }
-        .content { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: pre-wrap; font-size: 18px; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+            transition: background-color 0.25s, color 0.25s;
+        }
+
+        /* --- CHẾ ĐỘ NỀN ĐỌC (THEMES) --- */
+        body.theme-sepia {
+            background-color: #efe7d6;
+            color: #3b2e1e;
+        }
+        body.theme-sepia .reader-card {
+            background-color: #faf4e8;
+            border-color: #e2d5bc;
+        }
+        body.theme-sepia .chapter-header,
+        body.theme-sepia .nav-bottom {
+            border-color: #e2d5bc;
+        }
+
+        body.theme-dark {
+            background-color: #111614;
+            color: #cbd5e1;
+        }
+        body.theme-dark .reader-card {
+            background-color: #19221f;
+            border-color: #26332e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        body.theme-dark .chapter-title { color: #f1f5f9; }
+        body.theme-dark .chapter-content { color: #d1d5db; }
+        body.theme-dark .chapter-header,
+        body.theme-dark .nav-bottom {
+            border-color: #26332e;
+        }
+        body.theme-dark .toolbar-box {
+            background-color: #19221f;
+            border-color: #26332e;
+        }
+
+        /* --- THANH MENU TRÊN CÙNG --- */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
+
+        /* --- CONTAINER TRANG ĐỌC --- */
+        .reader-container {
+            max-width: 860px;
+            margin: 26px auto 50px auto;
+            padding: 0 18px;
+        }
+
+        /* Thanh công cụ tùy chỉnh giao diện đọc */
+        .toolbar-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 18px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-right: 4px;
+        }
+        .tool-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+            padding: 5px 11px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tool-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+        .theme-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .theme-dot:hover { transform: scale(1.12); }
+        .theme-dot.active { border-color: #318c5b; box-shadow: 0 0 0 2px rgba(49, 140, 91, 0.35); }
+
+        /* --- KHUNG NỘI DUNG CHÍNH --- */
+        .reader-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 36px 44px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.25s, border-color 0.25s;
+        }
+        @media (max-width: 640px) {
+            .reader-card { padding: 24px 20px; }
+        }
+
+        .chapter-header {
+            text-align: center;
+            padding-bottom: 22px;
+            margin-bottom: 26px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .chapter-title {
+            margin: 0 0 18px 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        /* --- CỤM NÚT CHUYỂN CHƯƠNG ĐỒNG BỘ XANH LÁ --- */
+        .chapter-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-chap {
+            background: #318c5b;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 3px 10px rgba(49, 140, 91, 0.22);
+        }
+        .btn-chap:hover {
+            background: #035935;
+            transform: translateY(-1px);
+        }
+        .btn-chap.disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            pointer-events: none;
+            box-shadow: none;
+        }
+        .btn-toc {
+            background: #e6f7ef;
+            color: #035935;
+            border: 1px solid #b7ebd1;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-toc:hover {
+            background: #d1f2e3;
+        }
+
+        /* --- VĂN BẢN NỘI DUNG TRUYỆN --- */
+        .chapter-content {
+            font-size: 19px;
+            line-height: 1.85;
+            color: #1e293b;
+            white-space: pre-line;
+            text-align: justify;
+            letter-spacing: 0.2px;
+            word-wrap: break-word;
+        }
+        .chapter-content.font-serif {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .nav-bottom {
+            margin-top: 36px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
     </style>
 </head>
 <body>
-    <a href="/story/<%= chapter.story_id %>" style="text-decoration: none;">← Về danh sách chương</a>
 
-    <h2>Chương <%= chapter.chapter_number %>: <%= chapter.title %></h2>
-
-    <!-- Thanh chuyển chương phía trên -->
-    <div class="nav-buttons">
-        <% if (prevChapterId) { %>
-            <a href="/chapter/<%= prevChapterId %>" class="btn">← Chương Trước</a>
-        <% } else { %>
-            <span class="btn disabled">← Chương Trước</span>
-        <% } %>
-
-        <a href="/story/<%= chapter.story_id %>" style="color: #666;">Mục Lục</a>
-
-        <% if (nextChapterId) { %>
-            <a href="/chapter/<%= nextChapterId %>" class="btn">Chương Sau →</a>
-        <% } else { %>
-            <span class="btn disabled">Chương Sau →</span>
-        <% } %>
+    <!-- Thanh Menu trên cùng -->
+    <div class="nav">
+        <a href="/">Trang Chủ</a>
+        <a href="/story/<%= chapter.story_id %>">← Danh sách chương</a>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b></span>
+                <% if (user.role === 'author' || user.role === 'admin') { %>
+                    <a href="/author">Khu vực Tác Giả</a>
+                <% } %>
+                <a href="/logout">Đăng Xuất</a>
+            <% } else { %>
+                <a href="/login">Đăng Nhập</a>
+            <% } %>
+        </div>
     </div>
 
-    <!-- Nội dung chương truyện -->
-    <div class="content"><%= chapter.content %></div>
+    <div class="reader-container">
 
-    <!-- Thanh chuyển chương phía dưới -->
-    <div class="nav-buttons">
-        <% if (prevChapterId) { %>
-            <a href="/chapter/<%= prevChapterId %>" class="btn">← Chương Trước</a>
-        <% } else { %>
-            <span class="btn disabled">← Chương Trước</span>
-        <% } %>
+        <!-- Thanh công cụ tùy chỉnh giao diện đọc -->
+        <div class="toolbar-box">
+            <div class="toolbar-group">
+                <span class="toolbar-label">Màu nền:</span>
+                <button type="button" class="theme-dot active" id="dot-light" style="background: #f4f6f9;" title="Nền sáng" onclick="setTheme('light')"></button>
+                <button type="button" class="theme-dot" id="dot-sepia" style="background: #efe7d6;" title="Giấy vàng chống mỏi mắt" onclick="setTheme('sepia')"></button>
+                <button type="button" class="theme-dot" id="dot-dark" style="background: #19221f;" title="Chế độ ban đêm" onclick="setTheme('dark')"></button>
+            </div>
 
-        <% if (nextChapterId) { %>
-            <a href="/chapter/<%= nextChapterId %>" class="btn">Chương Sau →</a>
-        <% } else { %>
-            <span class="btn disabled">Chương Sau →</span>
-        <% } %>
+            <div class="toolbar-group">
+                <span class="toolbar-label">Cỡ chữ:</span>
+                <button type="button" class="tool-btn" onclick="changeFontSize(-1)">A-</button>
+                <span id="fontSizeDisplay" style="font-size: 13px; font-weight: 700; min-width: 36px; text-align: center;">19px</span>
+                <button type="button" class="tool-btn" onclick="changeFontSize(1)">A+</button>
+            </div>
+
+            <div class="toolbar-group">
+                <span class="toolbar-label">Phông:</span>
+                <button type="button" class="tool-btn" id="btnToggleFont" onclick="toggleFontFamily()">Chữ Sách (Serif)</button>
+            </div>
+        </div>
+
+        <!-- Khung đọc truyện chính -->
+        <div class="reader-card">
+            <div class="chapter-header">
+                <h1 class="chapter-title"><%= chapter.title %></h1>
+
+                <!-- Nút chuyển chương phía trên -->
+                <div class="chapter-nav">
+                    <% if (prevChapterId) { %>
+                        <a href="/chapter/<%= prevChapterId %>" id="prevChapLink" class="btn-chap">← Chương Trước</a>
+                    <% } else { %>
+                        <span class="btn-chap disabled">← Chương Trước</span>
+                    <% } %>
+
+                    <a href="/story/<%= chapter.story_id %>" class="btn-toc">📑 Mục Lục</a>
+
+                    <% if (nextChapterId) { %>
+                        <a href="/chapter/<%= nextChapterId %>" id="nextChapLink" class="btn-chap">Chương Sau →</a>
+                    <% } else { %>
+                        <span class="btn-chap disabled">Chương Sau →</span>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Nội dung chương -->
+            <div class="chapter-content" id="chapterContent"><%= chapter.content %></div>
+
+            <!-- Nút chuyển chương phía dưới (đọc xong bấm tiếp luôn) -->
+            <div class="nav-bottom">
+                <div class="chapter-nav">
+                    <% if (prevChapterId) { %>
+                        <a href="/chapter/<%= prevChapterId %>" class="btn-chap">← Chương Trước</a>
+                    <% } else { %>
+                        <span class="btn-chap disabled">← Chương Trước</span>
+                    <% } %>
+
+                    <a href="/story/<%= chapter.story_id %>" class="btn-toc">📑 Mục Lục</a>
+
+                    <% if (nextChapterId) { %>
+                        <a href="/chapter/<%= nextChapterId %>" class="btn-chap">Chương Sau →</a>
+                    <% } else { %>
+                        <span class="btn-chap disabled">Chương Sau →</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <script>
+        let currentFontSize = parseInt(localStorage.getItem('reader_font_size')) || 19;
+        let currentTheme = localStorage.getItem('reader_theme') || 'light';
+        let isSerif = localStorage.getItem('reader_serif') === 'true';
+
+        const contentEl = document.getElementById('chapterContent');
+        const sizeDisplay = document.getElementById('fontSizeDisplay');
+        const fontBtn = document.getElementById('btnToggleFont');
+
+        function applySettings() {
+            contentEl.style.fontSize = currentFontSize + 'px';
+            sizeDisplay.textContent = currentFontSize + 'px';
+
+            document.body.classList.remove('theme-sepia', 'theme-dark');
+            document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+            if (currentTheme === 'sepia') {
+                document.body.classList.add('theme-sepia');
+                document.getElementById('dot-sepia').classList.add('active');
+            } else if (currentTheme === 'dark') {
+                document.body.classList.add('theme-dark');
+                document.getElementById('dot-dark').classList.add('active');
+            } else {
+                document.getElementById('dot-light').classList.add('active');
+            }
+
+            if (isSerif) {
+                contentEl.classList.add('font-serif');
+                fontBtn.textContent = 'Chữ Hiện Đại';
+            } else {
+                contentEl.classList.remove('font-serif');
+                fontBtn.textContent = 'Chữ Sách (Serif)';
+            }
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('reader_theme', theme);
+            applySettings();
+        }
+
+        function changeFontSize(delta) {
+            currentFontSize = Math.min(28, Math.max(15, currentFontSize + delta));
+            localStorage.setItem('reader_font_size', currentFontSize);
+            applySettings();
+        }
+
+        function toggleFontFamily() {
+            isSerif = !isSerif;
+            localStorage.setItem('reader_serif', isSerif);
+            applySettings();
+        }
+
+        // Hỗ trợ phím mũi tên trái / phải để chuyển chương
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                const prev = document.getElementById('prevChapLink');
+                if (prev) window.location.href = prev.href;
+            } else if (e.key === 'ArrowRight') {
+                const next = document.getElementById('nextChapLink');
+                if (next) window.location.href = next.href;
+            }
+        });
+
+        applySettings();
+    </script>
+
 </body>
 </html>

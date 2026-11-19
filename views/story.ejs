@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Chương - <%= story.title %></title>
+    <title><%= story.title %> - Web Đọc Truyện Online</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -11,8 +11,6 @@
             background-color: #f4f6f9;
             color: #1e293b;
         }
-
-        /* Thanh Menu đồng bộ */
         .nav {
             background: #78cfa0;
             padding: 12px 24px;
@@ -29,341 +27,220 @@
             transition: color 0.2s;
         }
         .nav a:hover { color: #035935; }
+        .container { max-width: 1000px; margin: 24px auto; padding: 0 20px; }
+        .breadcrumb { font-size: 14px; color: #64748b; margin-bottom: 18px; }
+        .breadcrumb a { color: #035935; text-decoration: none; font-weight: 600; }
 
-        .container {
-            max-width: 1140px;
-            margin: 28px auto;
-            padding: 0 20px;
-        }
-
-        /* Header thông tin bộ truyện đang quản lý */
-        .story-banner {
-            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 65%, #52b788 100%);
+        .story-hero {
+            background: #ffffff;
             border-radius: 14px;
-            padding: 22px 28px;
-            color: #ffffff;
+            padding: 28px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 32px;
+            align-items: flex-start;
             margin-bottom: 24px;
-            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.16);
-            flex-wrap: wrap;
-            gap: 16px;
         }
-        .story-banner h1 { margin: 0 0 6px 0; font-size: 22px; }
-        .story-banner p { margin: 0; font-size: 14px; opacity: 0.9; }
-
-        /* Bố cục 2 cột */
-        .manage-grid {
-            display: grid;
-            grid-template-columns: 440px 1fr;
-            gap: 24px;
-            align-items: start;
-        }
-        @media (max-width: 900px) { .manage-grid { grid-template-columns: 1fr; } }
-
-        .panel-card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-        .panel-title {
-            margin: 0 0 18px 0;
-            font-size: 18px;
-            font-weight: 800;
-            color: #0f172a;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #f1f5f9;
-        }
-
-        .form-group { margin-bottom: 16px; }
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 700;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .form-control {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            color: #0f172a;
-            background: #f8fafc;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .form-control:focus {
-            background: #ffffff;
-            border-color: #318c5b;
-            box-shadow: 0 0 0 3px rgba(49, 140, 91, 0.15);
-        }
-        textarea.form-control {
-            resize: vertical;
-            min-height: 220px;
-            line-height: 1.6;
-        }
-
-        .btn-primary {
-            width: 100%;
-            background: #318c5b;
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary:hover { background: #035935; }
-
-        /* Danh sách chương */
-        .chapter-list {
+        .story-cover {
+            width: 210px;
+            height: 295px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1e3a34 0%, #318c5b 55%, #78cfa0 100%);
+            box-shadow: 0 10px 22px rgba(3, 89, 53, 0.25);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-        .chapter-row {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 14px 18px;
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            gap: 14px;
-            transition: all 0.2s;
+            padding: 22px 18px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
         }
-        .chapter-row:hover {
-            background: #ffffff;
-            border-color: #78cfa0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-        }
-        .chapter-name {
-            font-size: 15px;
+        .cover-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: 700;
-            color: #0f172a;
-            text-decoration: none;
-            flex: 1;
+            text-transform: uppercase;
+            align-self: flex-start;
         }
-        .chapter-name:hover { color: #035935; }
+        .cover-title { font-size: 18px; font-weight: 800; line-height: 1.35; }
+        .cover-author { font-size: 12px; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.25); padding-top: 8px; }
 
-        .chapter-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
+        .story-info { flex: 1; }
+        .story-title { margin: 0 0 12px 0; font-size: 28px; font-weight: 800; color: #0f172a; }
+        .story-tags { display: flex; gap: 8px; margin-bottom: 18px; }
+        .tag-category {
+            background: #e6f7ef; color: #035935; border: 1px solid #b7ebd1;
+            padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;
         }
-        .btn-sm {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.15s;
+        .story-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            border: 1px solid #e2e8f0;
         }
-        .btn-view { background: #f1f5f9; color: #334155; }
-        .btn-view:hover { background: #e2e8f0; }
+        .stat-item span { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+        .stat-item strong { font-size: 15px; color: #0f172a; }
 
-        .btn-edit { background: #e0f2fe; color: #0369a1; }
-        .btn-edit:hover { background: #bae6fd; }
-
-        .btn-delete { background: #fee2e2; color: #b91c1c; }
-        .btn-delete:hover { background: #fecaca; }
-
-        /* --- POPUP MODAL SỬA CHƯƠNG --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .action-buttons { display: flex; gap: 12px; align-items: center; }
+        .btn-read-now {
+            background: #318c5b; color: #ffffff; text-decoration: none;
+            padding: 12px 26px; border-radius: 8px; font-weight: 700; font-size: 15px;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(49, 140, 91, 0.3);
         }
-        .modal-overlay.show { display: flex; }
-        .modal-box {
+        .btn-read-now:hover { background: #035935; }
+        .btn-secondary {
+            background: #ffffff; color: #334155; border: 1px solid #cbd5e1;
+            text-decoration: none; padding: 11px 18px; border-radius: 8px;
+            font-weight: 600; font-size: 14px;
+        }
+
+        .content-box {
             background: #ffffff;
-            width: 100%;
-            max-width: 680px;
             border-radius: 14px;
-            padding: 26px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-            animation: popIn 0.2s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .tabs-header { display: flex; border-bottom: 2px solid #e2e8f0; background: #f8fafc; }
+        .tab-btn {
+            flex: 1; padding: 16px; text-align: center; font-size: 16px;
+            font-weight: 700; color: #64748b; background: none; border: none;
+            cursor: pointer; position: relative;
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e2e8f0;
+        .tab-btn.active { color: #035935; background: #ffffff; }
+        .tab-btn.active::after {
+            content: ""; position: absolute; bottom: -2px; left: 0; right: 0;
+            height: 3px; background: #318c5b;
         }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #64748b;
-            cursor: pointer;
+        .tab-panel { display: none; padding: 26px 28px; }
+        .tab-panel.active { display: block; }
+        .story-desc { font-size: 15px; line-height: 1.8; color: #334155; white-space: pre-line; }
+
+        .chapter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 24px; }
+        .chapter-item {
+            padding: 12px 14px;
+            border-bottom: 1px dashed #e2e8f0;
+            border-radius: 6px;
         }
-        .modal-close:hover { color: #0f172a; }
+        .chapter-item:hover { background: #f0fdf4; }
+        .chapter-link { color: #1e293b; text-decoration: none; font-weight: 600; font-size: 15px; }
+        .chapter-link:hover { color: #035935; }
     </style>
 </head>
 <body>
-
-    <!-- Thanh Menu -->
     <div class="nav">
-        <a href="/author">← Quay lại Khu Vực Tác Giả</a>
-        <a href="/story/<%= story.id %>" style="margin-left: auto;">👁️ Xem trang truyện</a>
         <a href="/">Trang Chủ</a>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b></span>
+                <% if (user.role === 'author' || user.role === 'admin') { %>
+                    <a href="/author">Khu vực Tác Giả</a>
+                <% } %>
+                <a href="/logout">Đăng Xuất</a>
+            <% } else { %>
+                <a href="/login">Đăng Nhập</a>
+                <a href="/register">Đăng Ký</a>
+            <% } %>
+        </div>
     </div>
 
     <div class="container">
-        <!-- Banner thông tin truyện -->
-        <div class="story-banner">
-            <div>
-                <h1>📑 Quản Lý Chương: <%= story.title %></h1>
-                <p>Thể loại: <b><%= story.category || 'Khác' %></b> | Tổng số chương hiện có: <b><%= chapters ? chapters.length : 0 %></b></p>
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a> &rsaquo; <%= story.title %>
+        </div>
+
+        <div class="story-hero">
+            <% if (story.cover_image) { %>
+                <div class="story-cover" style="padding: 0;">
+                    <img src="<%= story.cover_image %>" alt="<%= story.title %>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                </div>
+            <% } else { %>
+                <div class="story-cover">
+                    <span class="cover-badge"><%= story.category || 'Truyện Hay' %></span>
+                    <div class="cover-title"><%= story.title %></div>
+                    <div class="cover-author">Tác giả: <%= story.author_name || 'Đang cập nhật' %></div>
+                </div>
+            <% } %>
+
+            <div class="story-info">
+                <h1 class="story-title"><%= story.title %></h1>
+
+                <div class="story-tags">
+                    <span class="tag-category"><%= story.category || 'Khác' %></span>
+                </div>
+
+                <div class="story-stats">
+                    <div class="stat-item">
+                        <span>Tác giả</span>
+                        <strong><%= story.author_name || 'Ẩn danh' %></strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Số chương</span>
+                        <strong><%= chapters ? chapters.length : 0 %> chương</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Trạng thái</span>
+                        <strong style="color: #035935;"><%= story.status || 'Đang cập nhật' %></strong>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <% if (chapters && chapters.length > 0) { %>
+                        <a href="/chapter/<%= chapters[0].id %>" class="btn-read-now">📖 Đọc từ đầu</a>
+                    <% } else { %>
+                        <span class="btn-secondary" style="opacity: 0.6;">Chưa có chương nào</span>
+                    <% } %>
+                </div>
             </div>
         </div>
 
-        <!-- Bố cục 2 cột -->
-        <div class="manage-grid">
-
-            <!-- CỘT TRÁI: THÊM CHƯƠNG MỚI -->
-            <div class="panel-card">
-                <h2 class="panel-title">✍️ Đăng Chương Mới</h2>
-                <form method="POST" action="/author/story/<%= story.id %>/add-chapter">
-                    <div class="form-group">
-                        <label class="form-label">Tiêu đề chương <span style="color: #ef4444;">*</span></label>
-                        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Chương 1: Khởi đầu mới" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Nội dung chương <span style="color: #ef4444;">*</span></label>
-                        <textarea name="content" class="form-control" placeholder="Nhập hoặc dán nội dung chương truyện vào đây..." required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary">+ Đăng Chương Mới</button>
-                </form>
+        <div class="content-box">
+            <div class="tabs-header">
+                <button type="button" class="tab-btn active" id="btn-tab-chapters" onclick="switchTab('chapters')">
+                    Danh sách chương (<%= chapters ? chapters.length : 0 %>)
+                </button>
+                <button type="button" class="tab-btn" id="btn-tab-desc" onclick="switchTab('desc')">
+                    Tóm tắt nội dung
+                </button>
             </div>
 
-            <!-- CỘT PHẢI: DANH SÁCH CHƯƠNG + SỬA / XÓA -->
-            <div class="panel-card">
-                <h2 class="panel-title">📚 Danh Sách Chương Đã Đăng (<%= chapters ? chapters.length : 0 %>)</h2>
-
+            <div class="tab-panel active" id="panel-chapters">
                 <% if (chapters && chapters.length > 0) { %>
-                    <div class="chapter-list">
-                        <% chapters.forEach(chap => { %>
-                            <div class="chapter-row">
-                                <a href="/chapter/<%= chap.id %>" class="chapter-name"><%= chap.title %></a>
-
-                                <!-- Lưu nội dung chương vào thẻ ẩn để mở popup sửa không bị lỗi dấu ngoặc -->
-                                <textarea id="raw-content-<%= chap.id %>" style="display:none;"><%= chap.content %></textarea>
-
-                                <div class="chapter-actions">
-                                    <a href="/chapter/<%= chap.id %>" class="btn-sm btn-view" target="_blank">👁️ Đọc</a>
-
-                                    <!-- Nút Sửa mở Modal ngay tại chỗ -->
-                                    <button type="button" class="btn-sm btn-edit"
-                                            data-id="<%= chap.id %>"
-                                            data-title="<%= chap.title %>"
-                                            onclick="openEditModal(this)">
-                                        ✏️ Sửa
-                                    </button>
-
-                                    <!-- Nút Xóa chương -->
-                                    <form method="POST" action="/author/delete-chapter/<%= chap.id %>" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA VĨNH VIỄN chương này không?');">
-                                        <input type="hidden" name="story_id" value="<%= story.id %>">
-                                        <button type="submit" class="btn-sm btn-delete">🗑️ Xóa</button>
-                                    </form>
-                                </div>
+                    <div class="chapter-grid">
+                        <% chapters.forEach(chapter => { %>
+                            <div class="chapter-item">
+                                <a href="/chapter/<%= chapter.id %>" class="chapter-link"><%= chapter.title %></a>
                             </div>
                         <% }) %>
                     </div>
                 <% } else { %>
-                    <div style="text-align: center; padding: 40px 20px; color: #64748b; background: #f8fafc; border-radius: 10px; border: 1px dashed #cbd5e1;">
-                        <p style="margin: 0 0 6px 0; font-size: 15px;">Truyện này chưa có chương nào.</p>
-                        <span style="font-size: 13px;">Hãy soạn thảo chương đầu tiên ở khung bên trái!</span>
-                    </div>
+                    <p style="color: #64748b; text-align: center; padding: 20px 0;">Bộ truyện này hiện chưa có chương nào được đăng.</p>
                 <% } %>
             </div>
 
-        </div>
-    </div>
-
-    <!-- POPUP MODAL SỬA CHƯƠNG TRỰC TIẾP -->
-    <div class="modal-overlay" id="editChapterModal" onclick="closeEditModal(event)">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 style="margin: 0; font-size: 18px; color: #0f172a;">✏️ Chỉnh Sửa Nội Dung Chương</h3>
-                <button type="button" class="modal-close" onclick="forceCloseModal()">&times;</button>
+            <div class="tab-panel" id="panel-desc">
+                <div class="story-desc"><%= story.description || 'Chưa có mô tả chi tiết cho bộ truyện này.' %></div>
             </div>
-
-            <form method="POST" id="editChapterForm" action="">
-                <input type="hidden" name="story_id" value="<%= story.id %>">
-
-                <div class="form-group">
-                    <label class="form-label">Tiêu đề chương</label>
-                    <input type="text" name="title" id="editChapTitle" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Nội dung chương</label>
-                    <textarea name="content" id="editChapContent" class="form-control" style="min-height: 260px;" required></textarea>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                    <button type="button" onclick="forceCloseModal()" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; font-weight: 600; cursor: pointer;">
-                        Hủy
-                    </button>
-                    <button type="submit" style="padding: 10px 22px; border-radius: 8px; border: none; background: #318c5b; color: #ffffff; font-weight: 700; cursor: pointer;">
-                        💾 Lưu Thay Đổi
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
     <script>
-        function openEditModal(btn) {
-            const chapId = btn.getAttribute('data-id');
-            const chapTitle = btn.getAttribute('data-title');
-            const chapContent = document.getElementById('raw-content-' + chapId).value;
+        function switchTab(tabName) {
+            document.getElementById('btn-tab-chapters').classList.remove('active');
+            document.getElementById('btn-tab-desc').classList.remove('active');
+            document.getElementById('panel-chapters').classList.remove('active');
+            document.getElementById('panel-desc').classList.remove('active');
 
-            document.getElementById('editChapterForm').action = '/author/edit-chapter/' + chapId;
-            document.getElementById('editChapTitle').value = chapTitle;
-            document.getElementById('editChapContent').value = chapContent;
-
-            document.getElementById('editChapterModal').classList.add('show');
-        }
-
-        function forceCloseModal() {
-            document.getElementById('editChapterModal').classList.remove('show');
-        }
-
-        function closeEditModal(event) {
-            if (event.target.id === 'editChapterModal') {
-                forceCloseModal();
-            }
+            document.getElementById('btn-tab-' + tabName).classList.add('active');
+            document.getElementById('panel-' + tabName).classList.add('active');
         }
     </script>
-
 </body>
 </html>

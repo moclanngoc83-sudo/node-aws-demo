@@ -3,13 +3,32 @@ const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
 
+// Đảm bảo thư mục lưu ảnh upload tồn tại
+const uploadDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Cấu hình Multer upload ảnh bìa
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, 'cover-' + Date.now() + ext);
+  }
+});
+const upload = multer({ storage });
+
 // Cấu hình View Engine & Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: 'mật_khẩu_bí_mật_web_truyện',
@@ -25,7 +44,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
 // Tạo các Bảng dữ liệu tự động
 db.serialize(() => {
-  // Bảng Users (vai trò: 'user', 'author', 'admin')
+  // Bảng Users
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
@@ -33,19 +52,24 @@ db.serialize(() => {
     role TEXT DEFAULT 'user'
   )`);
 
-  // Bảng Stories (Truyện)
+  // Bảng Stories
   db.run(`CREATE TABLE IF NOT EXISTS stories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     description TEXT,
     category TEXT DEFAULT 'Khác',
+    status TEXT DEFAULT 'Đang cập nhật',
+    cover_image TEXT,
     author_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  db.run(`ALTER TABLE stories ADD COLUMN category TEXT DEFAULT 'Khác'`, (err) => {
-  });
 
-  // Bảng Chapters (Chương)
+  // Bổ sung các cột mới nếu bảng stories đã tồn tại từ trước
+  db.run(`ALTER TABLE stories ADD COLUMN category TEXT DEFAULT 'Khác'`, () => {});
+  db.run(`ALTER TABLE stories ADD COLUMN status TEXT DEFAULT 'Đang cập nhật'`, () => {});
+  db.run(`ALTER TABLE stories ADD COLUMN cover_image TEXT`, () => {});
+
+  // Bảng Chapters
   db.run(`CREATE TABLE IF NOT EXISTS chapters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     story_id INTEGER,
@@ -54,19 +78,18 @@ db.serialize(() => {
     content TEXT
   )`);
 
-  // Bảng Danh mục / Thể loại truyện
+  // Bảng Danh mục / Thể loại
   db.run(`CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE
   )`, () => {
-    // Chèn sẵn danh sách thể loại mặc định nếu bảng chưa có dữ liệu
     const defaultCategories = ['Tiên Hiệp', 'Kiếm Hiệp', 'Ngôn Tình', 'Đô Thị', 'Kinh Dị', 'Khoa Học Viễn Tưởng', 'Hành Động'];
     defaultCategories.forEach(cat => {
       db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [cat]);
     });
   });
 
-  // Tạo tài khoản Admin mặc định (admin / admin123)
+  // Tài khoản Admin mặc định (admin / admin123)
   const defaultAdminPass = bcrypt.hashSync('admin123', 10);
   db.run(`INSERT OR IGNORE INTO users (id, username, password, role) VALUES (1, 'admin', ?, 'admin')`, [defaultAdminPass]);
 });
@@ -77,11 +100,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- ROUTE TRANG CHỦ & ĐỌC TRUYỆN ---
+// ==========================================
+// 1. ROUTE TRANG CHỦ & ĐỌC TRUYỆN
+// ==========================================
 
-// Trang chủ danh sách truyện
-// Trang chủ: Hiển thị danh sách truyện (có lọc theo thể loại)
-// Trang chủ: Hiển thị danh sách truyện (Tìm kiếm + Lọc thể loại)
 app.get('/', (req, res) => {
   const selectedCategory = req.query.category;
   const searchQuery = req.query.search ? req.query.search.trim() : '';
@@ -92,13 +114,11 @@ app.get('/', (req, res) => {
              WHERE 1=1`;
   let params = [];
 
-  // 1. Lọc theo thể loại nếu người dùng chọn
   if (selectedCategory && selectedCategory !== 'All') {
     sql += ` AND stories.category = ?`;
     params.push(selectedCategory);
   }
 
-  // 2. Tìm kiếm theo tên truyện (không phân biệt hoa/thường)
   if (searchQuery !== '') {
     sql += ` AND stories.title LIKE ?`;
     params.push(`%${searchQuery}%`);
@@ -106,7 +126,6 @@ app.get('/', (req, res) => {
 
   sql += ` ORDER BY stories.id DESC`;
 
-  // Lấy danh sách truyện và danh sách thể loại
   db.all(sql, params, (err, stories) => {
     db.all(`SELECT * FROM categories`, [], (err, categories) => {
       res.render('index', {
@@ -118,15 +137,23 @@ app.get('/', (req, res) => {
     });
   });
 });
+
 // Chi tiết truyện & Danh sách chương
 app.get('/story/:id', (req, res) => {
   const storyId = req.params.id;
-  db.get(`SELECT stories.*, users.username as author_name FROM stories JOIN users ON stories.author_id = users.id WHERE stories.id = ?`, [storyId], (err, story) => {
-    if (!story) return res.send('Không tìm thấy truyện!');
-    db.all(`SELECT * FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC`, [storyId], (err, chapters) => {
-      res.render('story', { story, chapters: chapters || [] });
-    });
-  });
+  db.get(
+    `SELECT stories.*, users.username AS author_name
+     FROM stories
+     JOIN users ON stories.author_id = users.id
+     WHERE stories.id = ?`,
+    [storyId],
+    (err, story) => {
+      if (!story) return res.send('Không tìm thấy truyện!');
+      db.all(`SELECT * FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC, id ASC`, [storyId], (err, chapters) => {
+        res.render('story', { story, chapters: chapters || [] });
+      });
+    }
+  );
 });
 
 // Trang đọc chương truyện
@@ -135,26 +162,28 @@ app.get('/chapter/:id', (req, res) => {
   db.get(`SELECT * FROM chapters WHERE id = ?`, [currentChapterId], (err, chapter) => {
     if (!chapter) return res.send('Không tìm thấy chương!');
     db.get(
-          `SELECT id FROM chapters WHERE story_id = ? AND chapter_number < ? ORDER BY chapter_number DESC LIMIT 1`,
-          [chapter.story_id, chapter.chapter_number],
-          (err, prevChapter) => {
-            db.get(
-                      `SELECT id FROM chapters WHERE story_id = ? AND chapter_number > ? ORDER BY chapter_number ASC LIMIT 1`,
-                      [chapter.story_id, chapter.chapter_number],
-                      (err, nextChapter) => {
-                        res.render('read', {
-                            chapter,
-                                          prevChapterId: prevChapter ? prevChapter.id : null,
-                                          nextChapterId: nextChapter ? nextChapter.id : null
-                            });
-                        }
-                      );
-            }
-          );
+      `SELECT id FROM chapters WHERE story_id = ? AND id < ? ORDER BY id DESC LIMIT 1`,
+      [chapter.story_id, chapter.id],
+      (err, prevChapter) => {
+        db.get(
+          `SELECT id FROM chapters WHERE story_id = ? AND id > ? ORDER BY id ASC LIMIT 1`,
+          [chapter.story_id, chapter.id],
+          (err, nextChapter) => {
+            res.render('read', {
+              chapter,
+              prevChapterId: prevChapter ? prevChapter.id : null,
+              nextChapterId: nextChapter ? nextChapter.id : null
+            });
+          }
+        );
+      }
+    );
   });
 });
 
-// --- ROUTE ĐĂNG KÝ / ĐĂNG NHẬP / ĐĂNG XUẤT ---
+// ==========================================
+// 2. ROUTE ĐĂNG KÝ / ĐĂNG NHẬP / ĐĂNG XUẤT
+// ==========================================
 
 app.get('/register', (req, res) => res.render('register'));
 app.post('/register', (req, res) => {
@@ -185,17 +214,31 @@ app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
+
+app.post('/user/delete-own-account', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send('Bạn cần đăng nhập để thực hiện thao tác này!');
+  }
+  const userId = req.session.user.id;
+  db.run(`DELETE FROM users WHERE id = ?`, [userId], (err) => {
+    if (err) return res.send('Lỗi khi xóa tài khoản!');
+    req.session.destroy(() => {
+      res.redirect('/');
+    });
+  });
+});
+
 // ==========================================
-// THƯ MỤC ROUTE TÁC GIẢ (AUTHOR & ADMIN)
+// 3. ROUTE TÁC GIẢ (AUTHOR & ADMIN)
 // ==========================================
 
-// 1. Trang quản lý tác giả (Xem danh sách truyện đã đăng)
+// Trang chính Khu vực Tác giả
 app.get('/author', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
 
-  db.all(`SELECT * FROM stories WHERE author_id = ?`, [req.session.user.id], (err, stories) => {
+  db.all(`SELECT * FROM stories WHERE author_id = ? ORDER BY id DESC`, [req.session.user.id], (err, stories) => {
     db.all(`SELECT * FROM categories`, [], (err, categories) => {
       res.render('author', {
         stories: stories || [],
@@ -204,74 +247,28 @@ app.get('/author', (req, res) => {
     });
   });
 });
-// 2. Đăng bài truyện mới (Đã bao gồm Thể loại)
-app.post('/author/add-story', (req, res) => {
+
+// Đăng truyện mới (Hỗ trợ cả Upload ảnh & Link URL)
+app.post('/author/create-story', upload.single('cover_file'), (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
 
-  const { title, description, category } = req.body;
+  const { title, description, category, cover_url } = req.body;
+  const cover_image = req.file ? `/uploads/${req.file.filename}` : (cover_url ? cover_url.trim() : null);
+
   db.run(
-    `INSERT INTO stories (title, description, category, author_id) VALUES (?, ?, ?, ?)`,
-    [title, description, category || 'Khác', req.session.user.id],
+    `INSERT INTO stories (title, description, category, author_id, cover_image) VALUES (?, ?, ?, ?, ?)`,
+    [title, description, category || 'Khác', req.session.user.id, cover_image],
     function (err) {
-      if (err) return res.send('Lỗi khi thêm truyện mới!');
+      if (err) return res.send('Lỗi khi thêm truyện mới: ' + err.message);
       res.redirect('/author');
     }
   );
 });
 
-// 3. Thêm chương truyện mới
-app.post('/author/add-chapter', (req, res) => {
-  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
-    return res.status(403).send('Quyền truy cập bị từ chối!');
-  }
-
-  const { story_id, chapter_number, title, content } = req.body;
-  db.run(
-    `INSERT INTO chapters (story_id, chapter_number, title, content) VALUES (?, ?, ?, ?)`,
-    [story_id, chapter_number, title, content],
-    (err) => {
-      if (err) return res.send('Lỗi khi thêm chương mới!');
-      res.redirect('/story/' + story_id);
-    }
-  );
-});
-
-// 4. Trang hiển thị Form sửa chương
-app.get('/author/edit-chapter/:id', (req, res) => {
-  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
-    return res.status(403).send('Quyền truy cập bị từ chối!');
-  }
-
-  const chapterId = req.params.id;
-  db.get(`SELECT * FROM chapters WHERE id = ?`, [chapterId], (err, chapter) => {
-    if (!chapter) return res.send('Không tìm thấy chương!');
-    res.render('edit-chapter', { chapter });
-  });
-});
-
-// 5. Lưu thông tin chương sau khi sửa
-app.post('/author/edit-chapter/:id', (req, res) => {
-  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
-    return res.status(403).send('Quyền truy cập bị từ chối!');
-  }
-
-  const chapterId = req.params.id;
-  const { chapter_number, title, content } = req.body;
-
-  db.run(
-    `UPDATE chapters SET chapter_number = ?, title = ?, content = ? WHERE id = ?`,
-    [chapter_number, title, content, chapterId],
-    (err) => {
-      if (err) return res.send('Lỗi khi cập nhật chương!');
-      res.redirect('/chapter/' + chapterId);
-    }
-  );
-});
-
-// 6. Trang hiển thị Form sửa tên/mô tả/thể loại bộ truyện
-app.get('/author/edit-story/:id', (req, res) => {
+// Mở trang Quản lý chương của 1 bộ truyện (Khi ấn nút "Quản lý chương")
+app.get('/author/story/:id', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
@@ -279,36 +276,83 @@ app.get('/author/edit-story/:id', (req, res) => {
   const storyId = req.params.id;
   db.get(`SELECT * FROM stories WHERE id = ?`, [storyId], (err, story) => {
     if (!story) return res.send('Không tìm thấy truyện!');
+    if (req.session.user.role !== 'admin' && story.author_id !== req.session.user.id) {
+      return res.status(403).send('Bạn không có quyền quản lý truyện này!');
+    }
 
-    // Lấy danh sách thể loại từ CSDL
-    db.all(`SELECT * FROM categories`, [], (err, categories) => {
-      res.render('edit-story', {
+    db.all(`SELECT * FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC, id ASC`, [storyId], (err, chapters) => {
+      res.render('manage_chapters', {
         story,
-        categories: categories || []
+        chapters: chapters || []
       });
     });
   });
 });
 
-// 7. Lưu thông tin bộ truyện sau khi sửa
-app.post('/author/edit-story/:id', (req, res) => {
+// Đăng chương mới ngay trong trang Quản lý chương
+app.post('/author/story/:id/add-chapter', (req, res) => {
   if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
 
   const storyId = req.params.id;
-  const { title, category, description } = req.body;
+  const { title, content } = req.body;
+
+  // Tự động lấy số thứ tự chương tiếp theo
+  db.get(`SELECT COUNT(*) AS count FROM chapters WHERE story_id = ?`, [storyId], (err, row) => {
+    const nextNumber = (row ? row.count : 0) + 1;
+    db.run(
+      `INSERT INTO chapters (story_id, chapter_number, title, content) VALUES (?, ?, ?, ?)`,
+      [storyId, nextNumber, title, content],
+      (err) => {
+        if (err) return res.send('Lỗi khi thêm chương mới!');
+        res.redirect(`/author/story/${storyId}`);
+      }
+    );
+  });
+});
+
+// Sửa chương từ Popup Modal trong trang Quản lý chương
+app.post('/author/edit-chapter/:id', (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+
+  const chapterId = req.params.id;
+  const { title, content, story_id } = req.body;
 
   db.run(
-    `UPDATE stories SET title = ?, category = ?, description = ? WHERE id = ?`,
-    [title, category, description, storyId],
+    `UPDATE chapters SET title = ?, content = ? WHERE id = ?`,
+    [title, content, chapterId],
     (err) => {
-      if (err) return res.send('Lỗi khi cập nhật thông tin truyện!');
-      res.redirect('/story/' + storyId);
+      if (err) return res.send('Lỗi khi cập nhật chương!');
+      if (story_id) {
+        res.redirect(`/author/story/${story_id}`);
+      } else {
+        res.redirect('/chapter/' + chapterId);
+      }
     }
   );
 });
-// --- ROUTE ADMIN ---
+
+// Xóa chương ngay trong trang Quản lý chương
+app.post('/author/delete-chapter/:id', (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'author' && req.session.user.role !== 'admin')) {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+
+  const chapterId = req.params.id;
+  const { story_id } = req.body;
+
+  db.run(`DELETE FROM chapters WHERE id = ?`, [chapterId], (err) => {
+    if (err) return res.send('Lỗi khi xóa chương!');
+    res.redirect(`/author/story/${story_id}`);
+  });
+});
+
+// ==========================================
+// 4. ROUTE ADMIN
+// ==========================================
 
 app.get('/admin', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
@@ -321,53 +365,30 @@ app.get('/admin', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server web đọc truyện đang chạy tại port ${PORT}`);
-});
-
-// Route cho phép người dùng đang đăng nhập (User, Author, Admin) tự xóa tài khoản của mình
-app.post('/user/delete-own-account', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).send('Bạn cần đăng nhập để thực hiện thao tác này!');
-  }
-
-  const userId = req.session.user.id;
-
-  // Xóa tài khoản khỏi CSDL
-  db.run(`DELETE FROM users WHERE id = ?`, [userId], (err) => {
-    if (err) return res.send('Lỗi khi xóa tài khoản!');
-
-    // Xóa session đăng nhập và quay về trang chủ
-    req.session.destroy(() => {
-      res.redirect('/');
-    });
-  });
-});
-
-// 1. Route Admin xem danh sách thể loại và form thêm thể loại
 app.get('/admin/categories', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Chỉ Admin mới có quyền quản lý thể loại!');
   }
-
   db.all(`SELECT * FROM categories`, [], (err, categories) => {
     res.render('admin-categories', { categories: categories || [] });
   });
 });
 
-// 2. Route Xử lý thêm thể loại mới
 app.post('/admin/add-category', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
-
   const { category_name } = req.body;
   if (!category_name || category_name.trim() === '') {
     return res.send('Tên thể loại không được để trống!');
   }
-
   db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [category_name.trim()], (err) => {
     if (err) return res.send('Lỗi khi thêm thể loại!');
     res.redirect('/admin/categories');
   });
+});
+
+// Khởi động Server
+app.listen(PORT, () => {
+  console.log(`Server web đọc truyện đang chạy tại port ${PORT}`);
 });

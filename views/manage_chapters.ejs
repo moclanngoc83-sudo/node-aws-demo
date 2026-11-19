@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Chương - <%= story.title %></title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
+
+        /* Thanh Menu đồng bộ */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
+
+        .container {
+            max-width: 1140px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* Header thông tin bộ truyện đang quản lý */
+        .story-banner {
+            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 65%, #52b788 100%);
+            border-radius: 14px;
+            padding: 22px 28px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.16);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .story-banner h1 { margin: 0 0 6px 0; font-size: 22px; }
+        .story-banner p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        /* Bố cục 2 cột */
+        .manage-grid {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) { .manage-grid { grid-template-columns: 1fr; } }
+
+        .panel-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .panel-title {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #0f172a;
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #318c5b;
+            box-shadow: 0 0 0 3px rgba(49, 140, 91, 0.15);
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 220px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #318c5b;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background: #035935; }
+
+        /* Danh sách chương */
+        .chapter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chapter-row {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
+        }
+        .chapter-row:hover {
+            background: #ffffff;
+            border-color: #78cfa0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        .chapter-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            flex: 1;
+        }
+        .chapter-name:hover { color: #035935; }
+
+        .chapter-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+        .btn-view { background: #f1f5f9; color: #334155; }
+        .btn-view:hover { background: #e2e8f0; }
+
+        .btn-edit { background: #e0f2fe; color: #0369a1; }
+        .btn-edit:hover { background: #bae6fd; }
+
+        .btn-delete { background: #fee2e2; color: #b91c1c; }
+        .btn-delete:hover { background: #fecaca; }
+
+        /* --- POPUP MODAL SỬA CHƯƠNG --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 680px;
+            border-radius: 14px;
+            padding: 26px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: popIn 0.2s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #0f172a; }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh Menu -->
+    <div class="nav">
+        <a href="/author">← Quay lại Khu Vực Tác Giả</a>
+        <a href="/story/<%= story.id %>" style="margin-left: auto;">👁️ Xem trang truyện</a>
+        <a href="/">Trang Chủ</a>
+    </div>
+
+    <div class="container">
+        <!-- Banner thông tin truyện -->
+        <div class="story-banner">
+            <div>
+                <h1>📑 Quản Lý Chương: <%= story.title %></h1>
+                <p>Thể loại: <b><%= story.category || 'Khác' %></b> | Tổng số chương hiện có: <b><%= chapters ? chapters.length : 0 %></b></p>
+            </div>
+        </div>
+
+        <!-- Bố cục 2 cột -->
+        <div class="manage-grid">
+
+            <!-- CỘT TRÁI: THÊM CHƯƠNG MỚI -->
+            <div class="panel-card">
+                <h2 class="panel-title">✍️ Đăng Chương Mới</h2>
+                <form method="POST" action="/author/story/<%= story.id %>/add-chapter">
+                    <div class="form-group">
+                        <label class="form-label">Tiêu đề chương <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Chương 1: Khởi đầu mới" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nội dung chương <span style="color: #ef4444;">*</span></label>
+                        <textarea name="content" class="form-control" placeholder="Nhập hoặc dán nội dung chương truyện vào đây..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">+ Đăng Chương Mới</button>
+                </form>
+            </div>
+
+            <!-- CỘT PHẢI: DANH SÁCH CHƯƠNG + SỬA / XÓA -->
+            <div class="panel-card">
+                <h2 class="panel-title">📚 Danh Sách Chương Đã Đăng (<%= chapters ? chapters.length : 0 %>)</h2>
+
+                <% if (chapters && chapters.length > 0) { %>
+                    <div class="chapter-list">
+                        <% chapters.forEach(chap => { %>
+                            <div class="chapter-row">
+                                <a href="/chapter/<%= chap.id %>" class="chapter-name"><%= chap.title %></a>
+
+                                <!-- Lưu nội dung chương vào thẻ ẩn để mở popup sửa không bị lỗi dấu ngoặc -->
+                                <textarea id="raw-content-<%= chap.id %>" style="display:none;"><%= chap.content %></textarea>
+
+                                <div class="chapter-actions">
+                                    <a href="/chapter/<%= chap.id %>" class="btn-sm btn-view" target="_blank">👁️ Đọc</a>
+
+                                    <!-- Nút Sửa mở Modal ngay tại chỗ -->
+                                    <button type="button" class="btn-sm btn-edit"
+                                            data-id="<%= chap.id %>"
+                                            data-title="<%= chap.title %>"
+                                            onclick="openEditModal(this)">
+                                        ✏️ Sửa
+                                    </button>
+
+                                    <!-- Nút Xóa chương -->
+                                    <form method="POST" action="/author/delete-chapter/<%= chap.id %>" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA VĨNH VIỄN chương này không?');">
+                                        <input type="hidden" name="story_id" value="<%= story.id %>">
+                                        <button type="submit" class="btn-sm btn-delete">🗑️ Xóa</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b; background: #f8fafc; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                        <p style="margin: 0 0 6px 0; font-size: 15px;">Truyện này chưa có chương nào.</p>
+                        <span style="font-size: 13px;">Hãy soạn thảo chương đầu tiên ở khung bên trái!</span>
+                    </div>
+                <% } %>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- POPUP MODAL SỬA CHƯƠNG TRỰC TIẾP -->
+    <div class="modal-overlay" id="editChapterModal" onclick="closeEditModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 style="margin: 0; font-size: 18px; color: #0f172a;">✏️ Chỉnh Sửa Nội Dung Chương</h3>
+                <button type="button" class="modal-close" onclick="forceCloseModal()">&times;</button>
+            </div>
+
+            <form method="POST" id="editChapterForm" action="">
+                <input type="hidden" name="story_id" value="<%= story.id %>">
+
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề chương</label>
+                    <input type="text" name="title" id="editChapTitle" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nội dung chương</label>
+                    <textarea name="content" id="editChapContent" class="form-control" style="min-height: 260px;" required></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="forceCloseModal()" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; font-weight: 600; cursor: pointer;">
+                        Hủy
+                    </button>
+                    <button type="submit" style="padding: 10px 22px; border-radius: 8px; border: none; background: #318c5b; color: #ffffff; font-weight: 700; cursor: pointer;">
+                        💾 Lưu Thay Đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(btn) {
+            const chapId = btn.getAttribute('data-id');
+            const chapTitle = btn.getAttribute('data-title');
+            const chapContent = document.getElementById('raw-content-' + chapId).value;
+
+            document.getElementById('editChapterForm').action = '/author/edit-chapter/' + chapId;
+            document.getElementById('editChapTitle').value = chapTitle;
+            document.getElementById('editChapContent').value = chapContent;
+
+            document.getElementById('editChapterModal').classList.add('show');
+        }
+
+        function forceCloseModal() {
+            document.getElementById('editChapterModal').classList.remove('show');
+        }
+
+        function closeEditModal(event) {
+            if (event.target.id === 'editChapterModal') {
+                forceCloseModal();
+            }
+        }
+    </script>
+
+</body>
+</html>

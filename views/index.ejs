@@ -18,18 +18,77 @@
             padding: 14px 24px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 1000;
         }
-        .nav a { color: #f8fafc; text-decoration: none; font-weight: 600; font-size: 15px; transition: color 0.2s; }
-        .nav a:hover { color: #035935; }
+        .nav a { color: #f8fafc; text-decoration: none; font-weight: 600; font-size: 15px; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
+        .nav a:hover, .dropdown-trigger:hover { color: #035935; }
 
+        /* --- MEGA MENU THỂ LOẠI --- */
+        .mega-menu{
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 24px;
+            width: 780px;
+            max-width: calc(100vw - 48px);
+            background: rgba(18, 28, 24, 0.94);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 24px 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+            color: #ffffff;
+            margin-top: 8px;
+            z-index: 999;
+        }
+        .mega-menu.show {
+            display: block;
+            animation: fadeInDown 0.2s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .mega-menu-title {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding-bottom: 12px;
+        }
+        /* Chia lưới 4 cột giống ảnh mẫu */
+        .mega-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px 20px;
+        }
+        .mega-grid a {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: block;
+        }
+        .mega-grid a:hover {
+            color: #78cfa0;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(3px);
+        }
+        .mega-grid a.active {
+            color: #78cfa0;
+            font-weight: 700;
+        }
         .container { max-width: 960px; margin: 30px auto; padding: 0 20px; }
 
         /* Khung Tìm kiếm & Lọc */
         .filter-box {
             background: white;
-            padding: 20px;
+            padding: 18px 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
@@ -47,26 +106,18 @@
             background: #78cfa0; color: white;
             border: none; padding: 10px 20px;
             border-radius: 6px; cursor: pointer;
-            font-weight: 600; transition: background 0.2s;
+            font-weight: 600; transition: all 0.2s;
         }
-        .btn-search:hover { background: #318c5b; }
-
-        /* Thẻ Nhãn Thể loại */
-        .category-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            margin: 4px;
-            border-radius: 20px;
-            background: #f1f5f9;
-            color: #035935;
+        .btn-search:hover { background: #318c5b; color: #fef08a; }
+        .btn-clear {
+            padding: 10px 14px;
+            background: #64748b;
+            color: white;
             text-decoration: none;
-            font-size: 13px; font-weight: 600;
-            transition: all 0.2s;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
         }
-        .category-badge:hover, .category-badge.active {
-            background: #035935; color: white;
-        }
-
         /* Card bộ truyện */
         .card {
             background: white;
@@ -96,93 +147,115 @@
 </head>
 <body>
 
-    <!-- Chỉ duy nhất 1 thanh Navigation -->
-    <div class="nav">
-        <a href="/"><b>Trang Chủ</b></a>
+    <!-- Thanh Navigation -->
+        <div class="nav">
+            <a href="/"><b>Trang Chủ</b></a>
 
-        <% if (user) { %>
-            <span>Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
+            <!-- Nút bấm mở bảng Thể loại -->
+            <button type="button" class="dropdown-trigger" id="categoryBtn">
+                Thể loại ▾
+            </button>
 
-            <% if (user.role === 'author' || user.role === 'admin') { %>
-                <a href="/author">Khu vực Tác Giả</a>
+            <% if (user) { %>
+                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
+
+                <% if (user.role === 'author' || user.role === 'admin') { %>
+                    <a href="/author">Khu vực Tác Giả</a>
+                <% } %>
+
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin">Khu vực Admin</a>
+                <% } %>
+
+                <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
+                    <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
+                </form>
+
+                <a href="/logout" style="margin-left: auto;">Đăng Xuất</a>
+            <% } else { %>
+                <div style="margin-left: auto;">
+                    <a href="/login" style="margin-right: 12px;">Đăng Nhập</a>
+                    <a href="/register">Đăng Ký</a>
+                </div>
             <% } %>
 
-            <% if (user.role === 'admin') { %>
-                <a href="/admin">Khu vực Admin</a>
-            <% } %>
-
-            <!-- Nút tự xóa tài khoản cá nhân -->
-            <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
-                <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
-            </form>
-
-            <a href="/logout" style="margin-left: auto;">Đăng Xuất</a>
-        <% } else { %>
-            <div style="margin-left: auto;">
-                <a href="/login" style="margin-right: 10px;">Đăng Nhập</a>
-                <a href="/register">Đăng Ký</a>
-            </div>
-        <% } %>
-    </div>
-
-    <!-- Nội dung chính -->
-    <div class="container">
-        <h2>Danh Sách Truyện Mới Cập Nhật</h2>
-
-        <!-- Ô Tìm kiếm & Thanh Lọc Thể loại -->
-        <div style="background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px;">
-
-            <!-- Form Tìm Kiếm -->
-            <form method="GET" action="/" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <% if (selectedCategory && selectedCategory !== 'All') { %>
-                    <input type="hidden" name="category" value="<%= selectedCategory %>">
-                <% } %>
-                <input type="text" name="search" value="<%= searchQuery %>" placeholder="Nhập tên truyện cần tìm..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
-                <button type="submit" style="background: #78cfa0; color: white; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">Tìm kiếm</button>
-                <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
-                    <a href="/" style="padding: 8px 12px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">Bỏ lọc</a>
-                <% } %>
-            </form>
-
-            <!-- Danh sách Thể loại -->
-            <!-- Danh sách Thể loại -->
-            <div style="font-size: 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
-                <b>Thể loại: </b>
-
-                <!-- Link "Tất cả" -->
-                <a href="/?search=<%= encodeURIComponent(searchQuery) %>"
-                   class="category-badge <%= selectedCategory === 'All' ? 'active' : '' %>">
-                    Tất cả
-                </a>
-
-                <!-- Vòng lặp danh sách Thể loại -->
-                <% categories.forEach(cat => { %>
-                    <a href="/?category=<%= encodeURIComponent(cat.name) %>&search=<%= encodeURIComponent(searchQuery) %>"
-                       class="category-badge <%= selectedCategory === cat.name ? 'active' : '' %>">
-                        <%= cat.name %>
+            <!-- Bảng Mega Menu xổ xuống khi bấm vào "Thể loại ▾" -->
+            <div class="mega-menu" id="categoryMenu">
+                <h4 class="mega-menu-title">Danh Mục Thể Loại Truyện</h4>
+                <div class="mega-grid">
+                    <a href="/?search=<%= encodeURIComponent(searchQuery) %>" class="<%= selectedCategory === 'All' ? 'active' : '' %>">
+                        Tất cả truyện
                     </a>
-                <% }) %>
+                    <% categories.forEach(cat => { %>
+                        <a href="/?category=<%= encodeURIComponent(cat.name) %>&search=<%= encodeURIComponent(searchQuery) %>"
+                           class="<%= selectedCategory === cat.name ? 'active' : '' %>">
+                            <%= cat.name %>
+                        </a>
+                    <% }) %>
+                </div>
             </div>
         </div>
 
-        <!-- Danh sách truyện -->
-        <% if (stories && stories.length > 0) { %>
-            <% stories.forEach(story => { %>
-                <div class="card">
-                    <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
-                    <p>
-                        Tác giả: <b><%= story.author_name %></b> |
-                        Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold;"><%= story.category || 'Khác' %></span>
-                    </p>
-                    <p><%= story.description %></p>
-                </div>
-            <% }) %>
-        <% } else { %>
-            <div class="card">
-                <p>Không tìm thấy bộ truyện nào phù hợp với từ khóa/thể loại đã chọn.</p>
-            </div>
-        <% } %>
-    </div>
+        <!-- Nội dung chính -->
+        <div class="container">
+            <h2>
+                Danh Sách Truyện
+                <% if (selectedCategory && selectedCategory !== 'All') { %>
+                    — Thể loại: <span style="color: #035935;"><%= selectedCategory %></span>
+                <% } %>
+            </h2>
 
-</body>
-</html>
+            <!-- Ô Tìm kiếm gọn gàng -->
+            <div class="filter-box">
+                <form method="GET" action="/" style="display: flex; gap: 10px;">
+                    <% if (selectedCategory && selectedCategory !== 'All') { %>
+                        <input type="hidden" name="category" value="<%= selectedCategory %>">
+                    <% } %>
+                    <input type="text" name="search" value="<%= searchQuery %>" placeholder="Nhập tên truyện cần tìm..." class="search-input">
+                    <button type="submit" class="btn-search">Tìm kiếm</button>
+                    <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
+                        <a href="/" class="btn-clear">Bỏ lọc</a>
+                    <% } %>
+                </form>
+            </div>
+
+            <!-- Danh sách truyện -->
+            <% if (stories && stories.length > 0) { %>
+                <% stories.forEach(story => { %>
+                    <div class="card">
+                        <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
+                        <p>
+                            Tác giả: <b><%= story.author_name %></b> |
+                            Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold;"><%= story.category || 'Khác' %></span>
+                        </p>
+                        <p><%= story.description %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="card">
+                    <p>Không tìm thấy bộ truyện nào phù hợp với từ khóa/thể loại đã chọn.</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Script xử lý đóng/mở bảng Thể loại -->
+        <script>
+            const categoryBtn = document.getElementById('categoryBtn');
+            const categoryMenu = document.getElementById('categoryMenu');
+
+            // Bấm vào nút "Thể loại ▾" để bật/tắt bảng
+            categoryBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                categoryMenu.classList.toggle('show');
+            });
+
+            // Bấm ra vùng trống bên ngoài thì tự đóng bảng lại
+            document.addEventListener('click', function(e) {
+                if (!categoryMenu.contains(e.target) && e.target !== categoryBtn) {
+                    categoryMenu.classList.remove('show');
+                }
+            });
+        </script>
+
+    </body>
+    </html>

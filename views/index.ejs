@@ -448,7 +448,6 @@
                     <span class="filter-tab active">Kết quả: "<%= searchQuery %>"</span>
                 <% } %>
             </div>
-            <span style="font-size: 13px; color: #64748b;">Hiển thị <b><%= stories ? stories.length : 0 %></b> tác phẩm</span>
         </div>
 
         <!-- Lưới Poster Bìa Sách Đứng -->
@@ -457,11 +456,8 @@
                 <% stories.forEach((story, index) => { %>
                     <a href="/story/<%= story.id %>" class="book-card">
                         <div class="book-cover-wrap">
-                            <!-- Ruy băng góc trái -->
-                            <span class="cover-ribbon">HOT</span>
-
-                            <!-- Nhãn Thể loại góc trên bên phải -->
-                            <span class="cover-cat-badge"><%= story.category || 'Khác' %></span>
+                            <!-- Nhãn Trạng thái góc trên bên phải -->
+                            <span class="cover-cat-badge"><%= story.status || 'Đang cập nhật' %></span>
 
                             <!-- Bìa sách 3D tự động đổi tông màu -->
                             <div class="book-cover-art cover-theme-<%= index % 5 %>">
@@ -476,10 +472,6 @@
                         </div>
 
                         <h3 class="book-title"><%= story.title %></h3>
-                        <div class="book-meta">
-                            <span>✍ <%= story.author_name || 'Ẩn danh' %></span>
-                            <span style="color: #318c5b; font-weight: 600;">Đọc &rsaquo;</span>
-                        </div>
                     </a>
                 <% }) %>
             </div>

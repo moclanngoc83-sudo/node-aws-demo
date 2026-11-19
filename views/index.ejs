@@ -359,6 +359,136 @@
             color: #64748b;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+/* --- USER PROFILE DROPDOWN --- */
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .user-trigger {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(3, 89, 53, 0.14);
+            padding: 5px 12px 5px 6px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .user-trigger:hover {
+            background: rgba(3, 89, 53, 0.25);
+        }
+        .user-avatar-sm {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #035935;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+        .user-name-label {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Bảng Menu xổ xuống nền tối */
+        .user-menu-box {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 260px;
+            background: #16221e;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+            color: #f8fafc;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        .user-menu-box.show {
+            display: block;
+            animation: fadeInDown 0.2s ease;
+        }
+        .user-menu-header {
+            padding: 18px 18px 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar-lg {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #318c5b, #78cfa0);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .user-role-badge {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(250, 204, 21, 0.18);
+            color: #facc15;
+            text-transform: uppercase;
+        }
+        .user-menu-list {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #e2e8f0 !important;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500 !important;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, color 0.15s;
+        }
+        .user-menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #78cfa0 !important;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 4px 8px;
+        }
+        .user-menu-item.danger {
+            color: #f87171 !important;
+        }
+        .user-menu-item.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5 !important;
+        }
     </style>
 </head>
 <body>

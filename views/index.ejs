@@ -399,19 +399,54 @@
         </form>
 
         <!-- Phần tài khoản -->
+<!-- Phần tài khoản dạng Dropdown Avatar (Giống Hình 1, 2, 3) -->
         <div style="display: flex; align-items: center; gap: 15px;">
             <% if (user) { %>
-                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
-                <% if (user.role === 'author' || user.role === 'admin') { %>
-                    <a href="/author">Khu vực Tác Giả</a>
-                <% } %>
-                <% if (user.role === 'admin') { %>
-                    <a href="/admin">Khu vực Admin</a>
-                <% } %>
-                <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
-                    <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
-                </form>
-                <a href="/logout">Đăng Xuất</a>
+                <div class="user-dropdown" id="userDropdown">
+                    <!-- Nút bấm Avatar + Tên trên thanh Menu -->
+                    <div class="user-trigger" onclick="toggleUserMenu(event)">
+                        <div class="user-avatar-sm"><%= user.username.charAt(0) %></div>
+                        <span class="user-name-label"><%= user.username %></span>
+                        <span style="color: #ffffff; font-size: 12px;">▾</span>
+                    </div>
+
+                    <!-- Bảng menu xổ xuống -->
+                    <div class="user-menu-box" id="userMenuBox">
+                        <div class="user-menu-header">
+                            <div class="user-avatar-lg"><%= user.username.charAt(0) %></div>
+                            <div style="overflow: hidden;">
+                                <div style="font-weight: 700; font-size: 16px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <%= user.username %>
+                                </div>
+                                <span class="user-role-badge">
+                                    <%= user.role === 'admin' ? 'Quản trị viên' : (user.role === 'author' ? 'Tác giả' : 'Tài khoản thường') %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="user-menu-list">
+                            <a href="/" class="user-menu-item">📚 Tủ truyện trang chủ</a>
+
+                            <% if (user.role === 'author' || user.role === 'admin') { %>
+                                <a href="/author" class="user-menu-item">✍️ Khu vực Tác Giả</a>
+                            <% } %>
+
+                            <% if (user.role === 'admin') { %>
+                                <a href="/admin" class="user-menu-item">⚙️ Khu vực Admin</a>
+                            <% } %>
+
+                            <div class="user-menu-divider"></div>
+
+                            <!-- Nút Xóa Tài Khoản nằm gọn bên trong -->
+                            <form method="POST" action="/user/delete-own-account" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
+                                <button type="submit" class="user-menu-item danger">🗑️ Xóa tài khoản</button>
+                            </form>
+
+                            <!-- Nút Đăng Xuất -->
+                            <a href="/logout" class="user-menu-item danger">🚪 Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
             <% } else { %>
                 <a href="/login">Đăng Nhập</a>
                 <a href="/register">Đăng Ký</a>
@@ -481,8 +516,22 @@
                 <a href="/" style="color: #035935; font-weight: 700; text-decoration: none;">← Xem tất cả truyện</a>
             </div>
         <% } %>
-
     </div>
+
+    <script>
+            function toggleUserMenu(event) {
+                event.stopPropagation();
+                document.getElementById('userMenuBox').classList.toggle('show');
+            }
+
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('userDropdown');
+                const menuBox = document.getElementById('userMenuBox');
+                if (dropdown && menuBox && !dropdown.contains(event.target)) {
+                    menuBox.classList.remove('show');
+                }
+            });
+        </script>
 
 </body>
 </html>

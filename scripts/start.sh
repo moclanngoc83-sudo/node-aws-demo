@@ -12,6 +12,4 @@ export NVM_DIR="$HOME/.nvm"
 npm install
 
 # Dừng app cũ và khởi chạy app mới
-pm2 delete node-app || true
-pm2 start app.js --name "node-app"
-pm2 save
+pm2 restart node-app || pm2 start app.js --name "node-app"

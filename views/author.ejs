@@ -1,44 +1,399 @@
 <!DOCTYPE html>
-<html>
-<head><title>Quản Lý Tác Giả</title></head>
-<body style="font-family: Arial; padding: 20px;">
-    <a href="/">← Trang chủ</a>
-    <h2>Khu Vực Dành Cho Tác Giả</h2>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Khu Vực Tác Giả - Creator Studio</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
 
-    <h3>Đăng Truyện Mới</h3>
-    <form method="POST" action="/author/create-story">
-        <div>
-            <label>Tiêu đề truyện:</label><br>
-            <input type="text" name="title" required style="width: 100%; padding: 8px;">
-        </div><br>
+        /* --- THANH MENU ĐỒNG BỘ --- */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
 
-        <div>
-            <label>Thể loại:</label><br>
-            <select name="category" style="width: 100%; padding: 8px;">
-                <% if (categories && categories.length > 0) { %>
-                    <% categories.forEach(cat => { %>
-                        <option value="<%= cat.name %>"><%= cat.name %></option>
-                    <% }) %>
-                <% } else { %>
-                    <option value="Khác">Khác</option>
+        .container {
+            max-width: 1140px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* --- HEADER CREATOR DASHBOARD --- */
+        .studio-header {
+            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 65%, #52b788 100%);
+            border-radius: 14px;
+            padding: 24px 30px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 26px;
+            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.16);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .studio-header h1 {
+            margin: 0 0 6px 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .studio-header p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .studio-stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(6px);
+            padding: 12px 22px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .studio-stat-num {
+            display: block;
+            font-size: 24px;
+            font-weight: 800;
+            color: #fef08a;
+        }
+        .studio-stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        /* --- BỐ CỤC 2 CỘT (TRÁI: TẠO TRUYỆN | PHẢI: QUẢN LÝ TRUYỆN) --- */
+        .studio-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .studio-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .panel-title {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- FORM ĐĂNG TRUYỆN MỚI --- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #0f172a;
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #318c5b;
+            box-shadow: 0 0 0 3px rgba(49, 140, 91, 0.15);
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 110px;
+            line-height: 1.5;
+        }
+
+        .btn-submit-story {
+            width: 100%;
+            background: #318c5b;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(49, 140, 91, 0.25);
+        }
+        .btn-submit-story:hover {
+            background: #035935;
+            transform: translateY(-1px);
+        }
+
+        /* --- DANH SÁCH TRUYỆN ĐÃ ĐĂNG --- */
+        .story-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .my-story-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s;
+            flex-wrap: wrap;
+        }
+        .my-story-item:hover {
+            background: #ffffff;
+            border-color: #78cfa0;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        }
+        .my-story-info {
+            flex: 1;
+            min-width: 220px;
+        }
+        .my-story-title {
+            margin: 0 0 6px 0;
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .my-story-title a {
+            color: #0f172a;
+            text-decoration: none;
+        }
+        .my-story-title a:hover {
+            color: #035935;
+        }
+        .my-story-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .badge-cat {
+            background: #e6f7ef;
+            color: #035935;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge-status {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .my-story-desc {
+            margin: 0;
+            font-size: 13px;
+            color: #64748b;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Cụm nút thao tác từng truyện */
+        .my-story-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-action {
+            padding: 7px 12px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+        }
+        .btn-chapters {
+            background: #318c5b;
+            color: #ffffff;
+        }
+        .btn-chapters:hover { background: #035935; }
+
+        .btn-edit {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .btn-edit:hover { background: #bae6fd; }
+
+        .btn-del {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .btn-del:hover { background: #fecaca; }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px dashed #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh Menu trên cùng -->
+    <div class="nav">
+        <a href="/">← Về Trang Chủ</a>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span style="color: #035935; font-size: 14px;">Tác giả: <b><%= user.username %></b></span>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin">Khu vực Admin</a>
                 <% } %>
-            </select>
+                <a href="/logout">Đăng Xuất</a>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Banner Header Creator Studio -->
+        <div class="studio-header">
+            <div>
+                <h1>✍️ Khu Vực Dành Cho Tác Giả</h1>
+                <p>Sáng tác, xuất bản và quản lý các bộ truyện của bạn một cách chuyên nghiệp.</p>
+            </div>
+            <div class="studio-stat-box">
+                <span class="studio-stat-num"><%= stories ? stories.length : 0 %></span>
+                <span class="studio-stat-label">Tác phẩm đã đăng</span>
+            </div>
         </div>
 
-        <div>
-            <label>Mô tả ngắn:</label><br>
-            <textarea name="description" rows="4" style="width: 100%; padding: 8px;" required></textarea>
-        </div><br>
+        <!-- Bố cục 2 cột -->
+        <div class="studio-grid">
 
-        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">Đăng Truyện</button>
-    </form>
+            <!-- CỘT TRÁI: FORM ĐĂNG TRUYỆN MỚI -->
+            <div class="panel-card">
+                <h2 class="panel-title">📝 Đăng Truyện Mới</h2>
 
-    <hr>
-    <h3>Truyện Đã Đăng Của Tôi:</h3>
-    <ul>
-        <% stories.forEach(s => { %>
-            <li><b><%= s.title %></b> - <a href="/story/<%= s.id %>">Quản lý chương</a></li>
-        <% }) %>
-    </ul>
+                <form method="POST" action="/author/create-story">
+                    <div class="form-group">
+                        <label class="form-label">Tiêu đề truyện <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="title" class="form-control" placeholder="Nhập tên bộ truyện của bạn..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Thể loại</label>
+                        <select name="category" class="form-control">
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat.name %>"><%= cat.name %></option>
+                                <% }) %>
+                            <% } else { %>
+                                <option value="Tiên Hiệp">Tiên Hiệp</option>
+                                <option value="Kiếm Hiệp">Kiếm Hiệp</option>
+                                <option value="Ngôn Tình">Ngôn Tình</option>
+                                <option value="Đô Thị">Đô Thị</option>
+                                <option value="Khác">Khác</option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mô tả ngắn / Tóm tắt</label>
+                        <textarea name="description" class="form-control" placeholder="Giới thiệu đôi nét hấp dẫn về nội dung cốt truyện..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit-story">+ Xuất Bản Truyện Mới</button>
+                </form>
+            </div>
+
+            <!-- CỘT PHẢI: DANH SÁCH TRUYỆN ĐÃ ĐĂNG -->
+            <div class="panel-card">
+                <h2 class="panel-title">📚 Truyện Đã Đăng Của Tôi (<%= stories ? stories.length : 0 %>)</h2>
+
+                <% if (stories && stories.length > 0) { %>
+                    <div class="story-list">
+                        <% stories.forEach(story => { %>
+                            <div class="my-story-item">
+                                <div class="my-story-info">
+                                    <h3 class="my-story-title">
+                                        <a href="/story/<%= story.id %>"><%= story.title %></a>
+                                    </h3>
+                                    <div class="my-story-badges">
+                                        <span class="badge-cat"><%= story.category || 'Khác' %></span>
+                                        <span class="badge-status"><%= story.status || 'Đang cập nhật' %></span>
+                                    </div>
+                                    <p class="my-story-desc"><%= story.description || 'Chưa có mô tả cho tác phẩm này.' %></p>
+                                </div>
+
+                                <div class="my-story-actions">
+                                    <a href="/author/story/<%= story.id %>" class="btn-action btn-chapters">
+                                        📑 Quản lý chương
+                                    </a>
+                                    <a href="/author/edit-story/<%= story.id %>" class="btn-action btn-edit">
+                                        ✏️ Sửa
+                                    </a>
+                                    <form method="POST" action="/author/delete-story/<%= story.id %>" style="margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa bộ truyện này cùng toàn bộ các chương không?');">
+                                        <button type="submit" class="btn-action btn-del">🗑️ Xóa</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-box">
+                        <p style="font-size: 15px; margin: 0 0 8px 0;">Bạn chưa xuất bản bộ truyện nào.</p>
+                        <span style="font-size: 13px;">Hãy điền thông tin ở khung bên trái để bắt đầu đăng tác phẩm đầu tiên!</span>
+                    </div>
+                <% } %>
+            </div>
+
+        </div>
+    </div>
+
 </body>
 </html>

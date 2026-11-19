@@ -2,61 +2,437 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title><%= story.title %></title>
+    <title><%= story.title %> - Web Đọc Truyện Online</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; background: #f9f9f9; color: #333; }
-        .back-link { text-decoration: none; color: #007bff; font-weight: bold; }
-        .story-header { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 15px; }
-        .chapter-list { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 20px; }
-        .chapter-list ul { list-style: none; padding: 0; }
-        .chapter-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
-        .chapter-list li:last-child { border-bottom: none; }
-        .chapter-list a { text-decoration: none; color: #333; font-weight: bold; }
-        .chapter-list a:hover { color: #007bff; }
-        .badge { background: #e9ecef; padding: 3px 8px; border-radius: 4px; font-size: 14px; color: #495057; font-weight: bold; }
-        .btn-link { color: #007bff; text-decoration: none; font-weight: bold; margin-left: 5px; }
-        .btn-link:hover { text-decoration: underline; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
+
+        /* Thanh Menu đồng bộ với Trang chủ */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
+
+        .container {
+            max-width: 1000px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        /* Breadcrumb điều hướng */
+        .breadcrumb {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 18px;
+        }
+        .breadcrumb a {
+            color: #035935;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        /* --- KHUNG THÔNG TIN TRUYỆN (HERO CARD 2 CỘT) --- */
+        .story-hero {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        /* Cột trái: Ảnh bìa truyện */
+        .story-cover {
+            width: 210px;
+            height: 295px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1e3a34 0%, #318c5b 55%, #78cfa0 100%);
+            box-shadow: 0 10px 22px rgba(3, 89, 53, 0.25);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 22px 18px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .story-cover::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; width: 10px;
+            background: rgba(0, 0, 0, 0.22); /* Tạo gáy sách 3D */
+        }
+        .cover-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            align-self: flex-start;
+            letter-spacing: 0.5px;
+        }
+        .cover-title {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.35;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .cover-author {
+            font-size: 12px;
+            opacity: 0.9;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            padding-top: 8px;
+        }
+
+        /* Cột phải: Chi tiết truyện */
+        .story-info {
+            flex: 1;
+        }
+        .story-title {
+            margin: 0 0 12px 0;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        /* Các thẻ tag thể loại & trạng thái */
+        .story-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .tag {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .tag-category {
+            background: #e6f7ef;
+            color: #035935;
+            border: 1px solid #b7ebd1;
+        }
+        .tag-status {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Bảng thông số nhỏ (Tác giả, Số chương) */
+        .story-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-item span {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .stat-item strong {
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        /* Cụm nút hành động */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn-read-now {
+            background: #318c5b;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 26px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(49, 140, 91, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-read-now:hover {
+            background: #035935;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: #035935;
+            color: #035935;
+            background: #f0fdf4;
+        }
+
+        /* --- PHẦN TAB NỘI DUNG (TÓM TẮT & DANH SÁCH CHƯƠNG) --- */
+        .content-box {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .tab-btn:hover { color: #035935; }
+        .tab-btn.active {
+            color: #035935;
+            background: #ffffff;
+        }
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            height: 3px;
+            background: #318c5b;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 26px 28px;
+        }
+        .tab-panel.active { display: block; }
+
+        .story-desc {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #334155;
+            white-space: pre-line;
+        }
+
+        /* Danh sách chương dạng lưới 2 cột gọn gàng */
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 24px;
+        }
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            border-bottom: 1px dashed #e2e8f0;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .chapter-item:hover {
+            background: #f0fdf4;
+        }
+        .chapter-link {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            flex: 1;
+        }
+        .chapter-link:hover { color: #035935; }
+        .edit-chap-link {
+            font-size: 12px;
+            color: #0284c7;
+            text-decoration: none;
+            margin-left: 10px;
+            padding: 3px 8px;
+            border: 1px solid #bae6fd;
+            border-radius: 4px;
+        }
+        .edit-chap-link:hover { background: #e0f2fe; }
+
+        @media (max-width: 720px) {
+            .story-hero { flex-direction: column; align-items: center; text-align: center; }
+            .story-tags, .action-buttons { justify-content: center; }
+            .chapter-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <a href="/" class="back-link">← Quay lại Trang chủ</a>
-
-    <!-- Khối thông tin chi tiết bộ truyện -->
-    <div class="story-header">
-        <h1 style="margin-top: 0;"><%= story.title %></h1>
-
-        <p>
-            Tác giả: <b><%= story.author_name %></b> |
-            Thể loại: <span class="badge"><%= story.category || 'Khác' %></span>
-
-            <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
-                — <a href="/author/edit-story/<%= story.id %>" class="btn-link">[Sửa Thông Tin Truyện]</a>
+    <!-- Thanh Menu trên cùng -->
+    <div class="nav">
+        <a href="/">Trang Chủ</a>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b></span>
+                <% if (user.role === 'author' || user.role === 'admin') { %>
+                    <a href="/author">Khu vực Tác Giả</a>
+                <% } %>
+                <a href="/logout">Đăng Xuất</a>
+            <% } else { %>
+                <a href="/login">Đăng Nhập</a>
+                <a href="/register">Đăng Ký</a>
             <% } %>
-        </p>
-
-        <p><b>Mô tả:</b> <%= story.description %></p>
+        </div>
     </div>
 
-    <!-- Khối danh sách chương -->
-    <div class="chapter-list">
-        <h3>Danh Sách Chương:</h3>
+    <div class="container">
+        <!-- Điều hướng Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a> &rsaquo; <%= story.title %>
+        </div>
 
-        <% if (chapters && chapters.length > 0) { %>
-            <ul>
-                <% chapters.forEach(chap => { %>
-                    <li>
-                        <a href="/chapter/<%= chap.id %>">Chương <%= chap.chapter_number %>: <%= chap.title %></a>
-                        <% if (user && (user.id === story.author_id || user.role === 'admin')) { %>
-                            — <a href="/author/edit-chapter/<%= chap.id %>" class="btn-link">[Sửa]</a>
-                        <% } %>
-                    </li>
-                <% }) %>
-            </ul>
-        <% } else { %>
-            <p>Truyện này chưa có chương nào.</p>
-        <% } %>
+        <!-- Khung Hero 2 cột (Ảnh bìa trái - Thông tin phải) -->
+        <div class="story-hero">
+            <!-- Bìa sách -->
+            <div class="story-cover">
+                <span class="cover-badge"><%= story.category || 'Truyện Hay' %></span>
+                <div class="cover-title"><%= story.title %></div>
+                <div class="cover-author">Tác giả: <%= story.author_name || 'Đang cập nhật' %></div>
+            </div>
+
+            <!-- Thông tin chi tiết -->
+            <div class="story-info">
+                <h1 class="story-title"><%= story.title %></h1>
+
+                <div class="story-tags">
+                    <span class="tag tag-category"><%= story.category || 'Khác' %></span>
+                    <span class="tag tag-status">Đang cập nhật</span>
+                </div>
+
+                <div class="story-stats">
+                    <div class="stat-item">
+                        <span>Tác giả</span>
+                        <strong><%= story.author_name || 'Ẩn danh' %></strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Số chương</span>
+                        <strong><%= chapters ? chapters.length : 0 %> chương</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Định dạng</span>
+                        <strong>Đọc Online</strong>
+                    </div>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="action-buttons">
+                    <% if (chapters && chapters.length > 0) { %>
+                        <a href="/chapter/<%= chapters[0].id %>" class="btn-read-now">
+                            📖 Đọc từ đầu
+                        </a>
+                        <a href="#ds-chuong" onclick="switchTab('chapters')" class="btn-secondary">
+                            📑 Danh sách chương (<%= chapters.length %>)
+                        </a>
+                    <% } else { %>
+                        <span class="btn-secondary" style="opacity: 0.6; cursor: not-allowed;">Chưa có chương nào</span>
+                    <% } %>
+
+                    <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.id === story.author_id)) { %>
+                        <a href="/author/edit-story/<%= story.id %>" class="btn-secondary">✏️ Sửa thông tin</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khung Tab: Tóm tắt & Danh sách chương -->
+        <div class="content-box" id="ds-chuong">
+            <div class="tabs-header">
+                <button type="button" class="tab-btn active" id="btn-tab-chapters" onclick="switchTab('chapters')">
+                    Danh sách chương (<%= chapters ? chapters.length : 0 %>)
+                </button>
+                <button type="button" class="tab-btn" id="btn-tab-desc" onclick="switchTab('desc')">
+                    Tóm tắt nội dung
+                </button>
+            </div>
+
+            <!-- Panel 1: Danh sách chương (Mặc định mở sẵn để dễ bấm đọc ngay) -->
+            <div class="tab-panel active" id="panel-chapters">
+                <% if (chapters && chapters.length > 0) { %>
+                    <div class="chapter-grid">
+                        <% chapters.forEach(chapter => { %>
+                            <div class="chapter-item">
+                                <a href="/chapter/<%= chapter.id %>" class="chapter-link">
+                                    <%= chapter.title %>
+                                </a>
+                                <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.id === story.author_id)) { %>
+                                    <a href="/author/edit-chapter/<%= chapter.id %>" class="edit-chap-link">Sửa</a>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="color: #64748b; text-align: center; padding: 20px 0;">Bộ truyện này hiện chưa có chương nào được đăng.</p>
+                <% } %>
+            </div>
+
+            <!-- Panel 2: Tóm tắt nội dung -->
+            <div class="tab-panel" id="panel-desc">
+                <div class="story-desc"><%= story.description || 'Chưa có mô tả chi tiết cho bộ truyện này.' %></div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.getElementById('btn-tab-chapters').classList.remove('active');
+            document.getElementById('btn-tab-desc').classList.remove('active');
+            document.getElementById('panel-chapters').classList.remove('active');
+            document.getElementById('panel-desc').classList.remove('active');
+
+            document.getElementById('btn-tab-' + tabName).classList.add('active');
+            document.getElementById('panel-' + tabName).classList.add('active');
+        }
+    </script>
 
 </body>
 </html>

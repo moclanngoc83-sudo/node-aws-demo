@@ -393,6 +393,50 @@ app.post('/admin/add-category', (req, res) => {
     res.redirect('/admin/categories');
   });
 });
+// Admin đổi vai trò người dùng (User <-> Author)
+app.post('/admin/change-role/:id', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+  const targetUserId = parseInt(req.params.id);
+  const { role } = req.body;
+  if (targetUserId === 1) return res.send('Không thể thay đổi quyền của Admin gốc!');
+
+  db.run(`UPDATE users SET role = ? WHERE id = ?`, [role, targetUserId], (err) => {
+    if (err) return res.send('Lỗi cập nhật vai trò!');
+    res.redirect('/admin');
+  });
+});
+
+// Admin xóa tài khoản người dùng
+app.post('/admin/delete-user/:id', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+  const targetUserId = parseInt(req.params.id);
+  if (targetUserId === 1 || targetUserId === req.session.user.id) {
+    return res.send('Không thể xóa tài khoản Admin gốc hoặc tài khoản đang đăng nhập!');
+  }
+
+  db.run(`DELETE FROM users WHERE id = ?`, [targetUserId], (err) => {
+    if (err) return res.send('Lỗi khi xóa người dùng!');
+    res.redirect('/admin');
+  });
+});
+
+// Admin xóa bộ truyện (kèm toàn bộ chương của truyện đó)
+app.post('/admin/delete-story/:id', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+  const storyId = req.params.id;
+  db.run(`DELETE FROM chapters WHERE story_id = ?`, [storyId], () => {
+    db.run(`DELETE FROM stories WHERE id = ?`, [storyId], (err) => {
+      if (err) return res.send('Lỗi khi xóa truyện!');
+      res.redirect('/admin');
+    });
+  });
+});
 
 // Khởi động Server
 app.listen(PORT, () => {

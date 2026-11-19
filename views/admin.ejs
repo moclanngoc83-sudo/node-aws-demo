@@ -1,28 +1,421 @@
 <!DOCTYPE html>
-<html>
-<head><title>Trang Quản Trị Admin</title></head>
-<body style="font-family: Arial; padding: 20px;">
-    <a href="/">← Trang chủ</a>
-    <h2>Bảng Điều Khiển Quản Trị Viên (Admin)</h2>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Điều Khiển Quản Trị Viên (Admin)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
 
-    <h3>Danh Sách Tài Khoản Hệ Thống:</h3>
-    <table border="1" cellpadding="8" style="border-collapse: collapse;">
-        <tr><th>ID</th><th>Username</th><th>Vai trò</th></tr>
-        <% users.forEach(u => { %>
-            <tr><td><%= u.id %></td><td><%= u.username %></td><td><b><%= u.role %></b></td></tr>
-        <% }) %>
-    </table>
+        /* --- THANH MENU ĐỒNG BỘ --- */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            flex-wrap: wrap;
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
 
-    <h3>Tất Cả Truyện Trên Hệ Thống:</h3>
-    <ul>
-        <% stories.forEach(s => { %>
-            <li><b><%= s.title %></b> (Đăng bởi: <%= s.author_name %>) - <a href="/story/<%= s.id %>">Xem</a></li>
-        <% }) %>
-    </ul>
-    <div style="margin-bottom: 20px;">
-        <a href="/admin/categories" style="background: #17a2b8; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-            + Quản Lý & Thêm Thể Loại Mới
-        </a>
+        .container {
+            max-width: 1180px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* --- BANNER HEADER ADMIN --- */
+        .admin-header {
+            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 65%, #52b788 100%);
+            border-radius: 14px;
+            padding: 24px 30px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.16);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .admin-header h1 { margin: 0 0 6px 0; font-size: 24px; }
+        .admin-header p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        .btn-cat-manage {
+            background: #ffffff;
+            color: #035935;
+            text-decoration: none;
+            padding: 11px 20px;
+            border-radius: 9px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-cat-manage:hover {
+            background: #f0fdf4;
+            transform: translateY(-1px);
+        }
+
+        /* --- 3 THẺ THỐNG KÊ NHANH --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 18px 22px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+        .stat-label { font-size: 13px; color: #64748b; font-weight: 600; }
+
+        /* --- BỐ CỤC 2 CỘT QUẢN TRỊ --- */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 960px) { .admin-grid { grid-template-columns: 1fr; } }
+
+        .panel-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .panel-title {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* --- BẢNG TÀI KHOẢN HIỆN ĐẠI --- */
+        .table-wrap { overflow-x: auto; }
+        table.modern-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .modern-table th {
+            text-align: left;
+            padding: 11px 12px;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .modern-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .modern-table tr:hover td { background: #f8fafc; }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #318c5b;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        /* Nhãn vai trò */
+        .role-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .role-admin { background: #fef3c7; color: #b45309; }
+        .role-author { background: #dcfce7; color: #15803d; }
+        .role-user { background: #e0f2fe; color: #0369a1; }
+
+        .role-select {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+            font-weight: 600;
+            background: #ffffff;
+            color: #1e293b;
+            cursor: pointer;
+        }
+
+        /* --- DANH SÁCH TRUYỆN HỆ THỐNG --- */
+        .story-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .story-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            transition: all 0.2s;
+        }
+        .story-item:hover {
+            background: #ffffff;
+            border-color: #78cfa0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .story-item-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .story-item-title:hover { color: #035935; }
+        .story-item-meta {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .cat-pill {
+            background: #e6f7ef;
+            color: #035935;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-view { background: #e0f2fe; color: #0369a1; }
+        .btn-view:hover { background: #bae6fd; }
+        .btn-chap { background: #dcfce7; color: #15803d; }
+        .btn-chap:hover { background: #bbf7d0; }
+        .btn-del { background: #fee2e2; color: #b91c1c; }
+        .btn-del:hover { background: #fecaca; }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh Menu đồng bộ -->
+    <div class="nav">
+        <a href="/">← Trang Chủ</a>
+        <a href="/author">Khu vực Tác Giả</a>
+        <a href="/admin/categories">Quản lý Thể loại</a>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span style="color: #035935; font-size: 14px;">Quản trị viên: <b><%= user.username %></b></span>
+                <a href="/logout">Đăng Xuất</a>
+            <% } %>
+        </div>
     </div>
+
+    <div class="container">
+        <!-- Banner Header -->
+        <div class="admin-header">
+            <div>
+                <h1>🛡️ Bảng Điều Khiển Quản Trị Viên</h1>
+                <p>Quản lý tài khoản người dùng, phân quyền tác giả, kiểm duyệt truyện và danh mục thể loại.</p>
+            </div>
+            <a href="/admin/categories" class="btn-cat-manage">+ Quản Lý & Thêm Thể Loại Mới</a>
+        </div>
+
+        <!-- 3 Thẻ thống kê nhanh -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0f2fe; color: #0369a1;">👥</div>
+                <div>
+                    <div class="stat-value"><%= users ? users.length : 0 %></div>
+                    <div class="stat-label">Tổng tài khoản hệ thống</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #dcfce7; color: #15803d;">✍️</div>
+                <div>
+                    <div class="stat-value">
+                        <%= users ? users.filter(u => u.role === 'author' || u.role === 'admin').length : 0 %>
+                    </div>
+                    <div class="stat-label">Tác giả & Quản trị viên</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #b45309;">📚</div>
+                <div>
+                    <div class="stat-value"><%= stories ? stories.length : 0 %></div>
+                    <div class="stat-label">Tổng số truyện đã đăng</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bố cục 2 cột -->
+        <div class="admin-grid">
+
+            <!-- CỘT TRÁI: DANH SÁCH TÀI KHOẢN -->
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span>👥 Danh Sách Tài Khoản (<%= users ? users.length : 0 %>)</span>
+                </h2>
+
+                <div class="table-wrap">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tài khoản</th>
+                                <th>Vai trò</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (users && users.length > 0) { %>
+                                <% users.forEach(u => { %>
+                                    <tr>
+                                        <td style="color: #64748b; font-weight: 600;">#<%= u.id %></td>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar"><%= u.username.charAt(0) %></div>
+                                                <strong><%= u.username %></strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="role-badge role-<%= u.role %>"><%= u.role %></span>
+                                        </td>
+                                        <td>
+                                            <% if (u.id !== 1) { %>
+                                                <div style="display: flex; gap: 6px; align-items: center;">
+                                                    <!-- Đổi quyền nhanh -->
+                                                    <form method="POST" action="/admin/change-role/<%= u.id %>" style="margin: 0;">
+                                                        <select name="role" class="role-select" onchange="this.form.submit()" title="Đổi vai trò">
+                                                            <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>User</option>
+                                                            <option value="author" <%= u.role === 'author' ? 'selected' : '' %>>Author</option>
+                                                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                                        </select>
+                                                    </form>
+
+                                                    <!-- Xóa user -->
+                                                    <form method="POST" action="/admin/delete-user/<%= u.id %>" style="margin: 0;" onsubmit="return confirm('Xóa tài khoản <%= u.username %>?');">
+                                                        <button type="submit" class="btn-sm btn-del" title="Xóa tài khoản">🗑️</button>
+                                                    </form>
+                                                </div>
+                                            <% } else { %>
+                                                <span style="font-size: 12px; color: #94a3b8; font-style: italic;">Hệ thống gốc</span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: TẤT CẢ TRUYỆN TRÊN HỆ THỐNG -->
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span>📚 Tất Cả Truyện Trên Hệ Thống (<%= stories ? stories.length : 0 %>)</span>
+                </h2>
+
+                <% if (stories && stories.length > 0) { %>
+                    <div class="story-list">
+                        <% stories.forEach(story => { %>
+                            <div class="story-item">
+                                <div style="flex: 1; min-width: 180px;">
+                                    <a href="/story/<%= story.id %>" class="story-item-title"><%= story.title %></a>
+                                    <div class="story-item-meta">
+                                        <span class="cat-pill"><%= story.category || 'Khác' %></span>
+                                        <span>✍ Tác giả: <b><%= story.author_name %></b></span>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <a href="/story/<%= story.id %>" class="btn-sm btn-view">👁️ Xem</a>
+                                    <a href="/author/story/<%= story.id %>" class="btn-sm btn-chap">📑 Chương</a>
+                                    <form method="POST" action="/admin/delete-story/<%= story.id %>" style="margin: 0;" onsubmit="return confirm('Admin xác nhận xóa bộ truyện này?');">
+                                        <button type="submit" class="btn-sm btn-del">🗑️ Xóa</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="color: #64748b; text-align: center; padding: 30px 0;">Chưa có bộ truyện nào trên hệ thống.</p>
+                <% } %>
+            </div>
+
+        </div>
+    </div>
+
 </body>
 </html>

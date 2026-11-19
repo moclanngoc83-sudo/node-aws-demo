@@ -374,12 +374,6 @@
                                     <a href="/author/story/<%= story.id %>" class="btn-action btn-chapters">
                                         📑 Quản lý chương
                                     </a>
-                                    <a href="/author/edit-story/<%= story.id %>" class="btn-action btn-edit">
-                                        ✏️ Sửa
-                                    </a>
-                                    <form method="POST" action="/author/delete-story/<%= story.id %>" style="margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa bộ truyện này cùng toàn bộ các chương không?');">
-                                        <button type="submit" class="btn-action btn-del">🗑️ Xóa</button>
-                                    </form>
                                 </div>
                             </div>
                         <% }) %>

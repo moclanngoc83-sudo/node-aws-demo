@@ -192,7 +192,7 @@
 </head>
 <body>
 
-    <!-- Thanh Navigation tích hợp sẵn tìm kiếm -->
+    <!-- Thanh Navigation  -->
     <div class="nav">
         <a href="/">Trang Chủ</a>
 
@@ -216,7 +216,7 @@
             </div>
         </div>
 
-        <!-- Thanh Tìm Kiếm nằm ngay trên Menu Bar -->
+        <!-- Thanh Tìm Kiếm được đẩy sang bên phải -->
         <form method="GET" action="/" class="nav-search-form">
             <% if (selectedCategory && selectedCategory !== 'All') { %>
                 <input type="hidden" name="category" value="<%= selectedCategory %>">
@@ -228,8 +228,8 @@
             <% } %>
         </form>
 
-        <!-- Phần tài khoản bên phải -->
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+        <!-- Phần tài khoản sát lề phải -->
+        <div style="display: flex; align-items: center; gap: 15px;">
             <% if (user) { %>
                 <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
 
@@ -252,7 +252,6 @@
             <% } %>
         </div>
     </div>
-
     <!-- Nội dung chính -->
     <div class="container">
         <h2>

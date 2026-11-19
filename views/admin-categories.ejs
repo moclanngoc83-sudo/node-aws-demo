@@ -2,31 +2,306 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Thể Loại Truyện</title>
+    <title>Quản Lý Thể Loại Truyện - Admin</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6; }
-        .form-group { margin-bottom: 15px; }
-        input[type="text"] { width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-        ul { list-style: none; padding: 0; }
-        li { background: #f8f9fa; padding: 8px 12px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #ddd; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
+
+        /* Thanh Menu đồng bộ */
+        .nav {
+            background: #78cfa0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .nav a {
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: #035935; }
+
+        .container {
+            max-width: 1060px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* Header Banner */
+        .page-header {
+            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 65%, #52b788 100%);
+            border-radius: 14px;
+            padding: 24px 30px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.16);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .page-header h1 { margin: 0 0 6px 0; font-size: 24px; }
+        .page-header p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-pill strong { display: block; font-size: 22px; color: #fef08a; }
+        .stat-pill span { font-size: 12px; text-transform: uppercase; }
+
+        /* Bố cục 2 cột */
+        .cat-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 820px) { .cat-grid { grid-template-columns: 1fr; } }
+
+        .panel-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .panel-title {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f8fafc;
+            outline: none;
+            margin-bottom: 14px;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #318c5b;
+            box-shadow: 0 0 0 3px rgba(49, 140, 91, 0.15);
+        }
+
+        .btn-add {
+            width: 100%;
+            background: #318c5b;
+            color: #ffffff;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-add:hover { background: #035935; }
+
+        /* Danh sách thể loại */
+        .cat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cat-row {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        .cat-row:hover {
+            background: #ffffff;
+            border-color: #78cfa0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+        .cat-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cat-index {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #e6f7ef;
+            color: #035935;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cat-name { font-weight: 700; font-size: 15px; color: #0f172a; }
+        .cat-count {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 2px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-sm {
+            padding: 6px 11px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit { background: #e0f2fe; color: #0369a1; }
+        .btn-edit:hover { background: #bae6fd; }
+        .btn-del { background: #fee2e2; color: #b91c1c; }
+        .btn-del:hover { background: #fecaca; }
+
+        /* Popup Sửa Thể Loại */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
     </style>
 </head>
 <body>
-    <a href="/admin">← Quay lại Bảng điều khiển Admin</a>
-    <h2>Quản Lý Thể Loại Truyện</h2>
 
-    <!-- Form Thêm Thể Loại Mới -->
-    <form method="POST" action="/admin/add-category" class="form-group">
-        <input type="text" name="category_name" placeholder="Nhập tên thể loại mới..." required>
-        <button type="submit" class="btn">Thêm Thể Loại</button>
-    </form>
+    <div class="nav">
+        <a href="/admin">← Quay lại Bảng điều khiển Admin</a>
+        <a href="/" style="margin-left: auto;">Trang Chủ</a>
+    </div>
 
-    <h3>Danh Sách Thể Loại Hiện Có:</h3>
-    <ul>
-        <% categories.forEach(cat => { %>
-            <li><b><%= cat.id %>.</b> <%= cat.name %></li>
-        <% }) %>
-    </ul>
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>🏷️ Quản Lý Thể Loại Truyện</h1>
+                <p>Thêm mới, đổi tên hoặc sắp xếp danh mục thể loại hiển thị trên Mega Menu trang chủ.</p>
+            </div>
+            <div class="stat-pill">
+                <strong><%= categories ? categories.length : 0 %></strong>
+                <span>Thể loại hiện có</span>
+            </div>
+        </div>
+
+        <div class="cat-grid">
+            <!-- CỘT TRÁI: THÊM THỂ LOẠI MỚI -->
+            <div class="panel-card">
+                <h2 class="panel-title">➕ Thêm Thể Loại Mới</h2>
+                <form method="POST" action="/admin/add-category">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Tên thể loại <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="text" name="category_name" class="form-control" placeholder="Ví dụ: Huyền Huyễn, Trinh Thám..." required>
+                    <button type="submit" class="btn-add">+ Thêm Thể Loại</button>
+                </form>
+            </div>
+
+            <!-- CỘT PHẢI: DANH SÁCH THỂ LOẠI -->
+            <div class="panel-card">
+                <h2 class="panel-title">📋 Danh Sách Thể Loại Hiện Có</h2>
+
+                <% if (categories && categories.length > 0) { %>
+                    <div class="cat-list">
+                        <% categories.forEach((cat, idx) => { %>
+                            <div class="cat-row">
+                                <div class="cat-info">
+                                    <span class="cat-index"><%= idx + 1 %></span>
+                                    <span class="cat-name"><%= cat.name %></span>
+                                    <span class="cat-count"><%= cat.story_count || 0 %> truyện</span>
+                                </div>
+
+                                <div style="display: flex; gap: 6px;">
+                                    <% if (cat.name !== 'Khác') { %>
+                                        <button type="button" class="btn-sm btn-edit"
+                                                data-id="<%= cat.id %>"
+                                                data-name="<%= cat.name %>"
+                                                onclick="openEditCat(this)">
+                                            ✏️ Sửa
+                                        </button>
+                                        <form method="POST" action="/admin/delete-category/<%= cat.id %>" style="margin: 0;" onsubmit="return confirm('Xóa thể loại <%= cat.name %>? Các truyện thuộc thể loại này sẽ được chuyển về mục Khác.');">
+                                            <input type="hidden" name="category_name" value="<%= cat.name %>">
+                                            <button type="submit" class="btn-sm btn-del">🗑️ Xóa</button>
+                                        </form>
+                                    <% } else { %>
+                                        <span style="font-size: 12px; color: #94a3b8; font-style: italic;">Mặc định</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SỬA TÊN THỂ LOẠI -->
+    <div class="modal-overlay" id="editCatModal" onclick="if(event.target.id==='editCatModal') closeEditCat()">
+        <div class="modal-box">
+            <h3 style="margin: 0 0 14px 0; font-size: 18px;">✏️ Đổi Tên Thể Loại</h3>
+            <form method="POST" id="editCatForm" action="">
+                <input type="hidden" name="old_name" id="oldCatName">
+                <input type="text" name="new_name" id="newCatName" class="form-control" required>
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" onclick="closeEditCat()" style="padding: 8px 14px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;">Hủy</button>
+                    <button type="submit" style="padding: 8px 16px; border-radius: 6px; border: none; background: #318c5b; color: #fff; font-weight: 700; cursor: pointer;">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditCat(btn) {
+            const id = btn.getAttribute('data-id');
+            const name = btn.getAttribute('data-name');
+            document.getElementById('editCatForm').action = '/admin/edit-category/' + id;
+            document.getElementById('oldCatName').value = name;
+            document.getElementById('newCatName').value = name;
+            document.getElementById('editCatModal').classList.add('show');
+        }
+        function closeEditCat() {
+            document.getElementById('editCatModal').classList.remove('show');
+        }
+    </script>
+
 </body>
 </html>

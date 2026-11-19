@@ -371,15 +371,25 @@ app.get('/admin', (req, res) => {
   });
 });
 
+// 1. Trang Quản lý Thể loại (kèm đếm số lượng truyện theo từng thể loại)
 app.get('/admin/categories', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Chỉ Admin mới có quyền quản lý thể loại!');
   }
-  db.all(`SELECT * FROM categories`, [], (err, categories) => {
+
+  const sql = `
+    SELECT c.id, c.name, COUNT(s.id) AS story_count
+    FROM categories c
+    LEFT JOIN stories s ON s.category = c.name
+    GROUP BY c.id, c.name
+    ORDER BY c.id ASC
+  `;
+  db.all(sql, [], (err, categories) => {
     res.render('admin-categories', { categories: categories || [] });
   });
 });
 
+// 2. Thêm thể loại mới
 app.post('/admin/add-category', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Quyền truy cập bị từ chối!');
@@ -393,48 +403,68 @@ app.post('/admin/add-category', (req, res) => {
     res.redirect('/admin/categories');
   });
 });
-// Admin đổi vai trò người dùng (User <-> Author)
-app.post('/admin/change-role/:id', (req, res) => {
+
+// 3. Sửa tên thể loại (và cập nhật đồng bộ cho các truyện thuộc thể loại đó)
+app.post('/admin/edit-category/:id', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
-  const targetUserId = parseInt(req.params.id);
-  const { role } = req.body;
-  if (targetUserId === 1) return res.send('Không thể thay đổi quyền của Admin gốc!');
+  const catId = req.params.id;
+  const { old_name, new_name } = req.body;
+  if (!new_name || new_name.trim() === '') return res.redirect('/admin/categories');
 
-  db.run(`UPDATE users SET role = ? WHERE id = ?`, [role, targetUserId], (err) => {
-    if (err) return res.send('Lỗi cập nhật vai trò!');
+  db.run(`UPDATE categories SET name = ? WHERE id = ?`, [new_name.trim(), catId], (err) => {
+    if (err) return res.send('Tên thể loại đã tồn tại hoặc có lỗi xảy ra!');
+    db.run(`UPDATE stories SET category = ? WHERE category = ?`, [new_name.trim(), old_name], () => {
+      res.redirect('/admin/categories');
+    });
+  });
+});
+
+// 4. Xóa thể loại (tự động chuyển các truyện thuộc thể loại bị xóa sang 'Khác')
+app.post('/admin/delete-category/:id', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+  const catId = req.params.id;
+  const { category_name } = req.body;
+  if (category_name === 'Khác') return res.send('Không thể xóa thể loại mặc định Khác!');
+
+  db.run(`UPDATE stories SET category = 'Khác' WHERE category = ?`, [category_name], () => {
+    db.run(`DELETE FROM categories WHERE id = ?`, [catId], (err) => {
+      if (err) return res.send('Lỗi khi xóa thể loại!');
+      res.redirect('/admin/categories');
+    });
+  });
+});
+
+// 5. Chức năng mở rộng cho Admin: Cấp tài khoản mới trực tiếp
+app.post('/admin/create-user', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Quyền truy cập bị từ chối!');
+  }
+  const { username, password, role } = req.body;
+  if (!username || !password) return res.send('Vui lòng nhập đủ tài khoản và mật khẩu!');
+
+  const hashPass = bcrypt.hashSync(password, 10);
+  db.run(`INSERT INTO users (username, password, role) VALUES (?, ?, ?)`, [username.trim(), hashPass, role || 'user'], (err) => {
+    if (err) return res.send('Tên đăng nhập đã tồn tại!');
     res.redirect('/admin');
   });
 });
 
-// Admin xóa tài khoản người dùng
-app.post('/admin/delete-user/:id', (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.status(403).send('Quyền truy cập bị từ chối!');
-  }
-  const targetUserId = parseInt(req.params.id);
-  if (targetUserId === 1 || targetUserId === req.session.user.id) {
-    return res.send('Không thể xóa tài khoản Admin gốc hoặc tài khoản đang đăng nhập!');
-  }
-
-  db.run(`DELETE FROM users WHERE id = ?`, [targetUserId], (err) => {
-    if (err) return res.send('Lỗi khi xóa người dùng!');
-    res.redirect('/admin');
-  });
-});
-
-// Admin xóa bộ truyện (kèm toàn bộ chương của truyện đó)
-app.post('/admin/delete-story/:id', (req, res) => {
+// 6. Chức năng mở rộng cho Admin: Đổi trạng thái truyện (Đang cập nhật <-> Đã hoàn thành)
+app.post('/admin/toggle-story-status/:id', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Quyền truy cập bị từ chối!');
   }
   const storyId = req.params.id;
-  db.run(`DELETE FROM chapters WHERE story_id = ?`, [storyId], () => {
-    db.run(`DELETE FROM stories WHERE id = ?`, [storyId], (err) => {
-      if (err) return res.send('Lỗi khi xóa truyện!');
-      res.redirect('/admin');
-    });
+  const { current_status } = req.body;
+  const nextStatus = current_status === 'Đã hoàn thành' ? 'Đang cập nhật' : 'Đã hoàn thành';
+
+  db.run(`UPDATE stories SET status = ? WHERE id = ?`, [nextStatus, storyId], (err) => {
+    if (err) return res.send('Lỗi cập nhật trạng thái!');
+    res.redirect('/admin');
   });
 });
 

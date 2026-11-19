@@ -263,6 +263,8 @@
         .btn-view:hover { background: #bae6fd; }
         .btn-chap { background: #dcfce7; color: #15803d; }
         .btn-chap:hover { background: #bbf7d0; }
+        .btn-status { background: #fef3c7; color: #b45309; }
+        .btn-status:hover { background: #fde68a; }
         .btn-del { background: #fee2e2; color: #b91c1c; }
         .btn-del:hover { background: #fecaca; }
     </style>
@@ -322,7 +324,7 @@
         <!-- Bố cục 2 cột -->
         <div class="admin-grid">
 
-            <!-- CỘT TRÁI: DANH SÁCH TÀI KHOẢN -->
+            <!-- CỘT TRÁI: DANH SÁCH TÀI KHOẢN + CẤP TÀI KHOẢN MỚI -->
             <div class="panel-card">
                 <h2 class="panel-title">
                     <span>👥 Danh Sách Tài Khoản (<%= users ? users.length : 0 %>)</span>
@@ -355,7 +357,6 @@
                                         <td>
                                             <% if (u.id !== 1) { %>
                                                 <div style="display: flex; gap: 6px; align-items: center;">
-                                                    <!-- Đổi quyền nhanh -->
                                                     <form method="POST" action="/admin/change-role/<%= u.id %>" style="margin: 0;">
                                                         <select name="role" class="role-select" onchange="this.form.submit()" title="Đổi vai trò">
                                                             <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>User</option>
@@ -364,7 +365,6 @@
                                                         </select>
                                                     </form>
 
-                                                    <!-- Xóa user -->
                                                     <form method="POST" action="/admin/delete-user/<%= u.id %>" style="margin: 0;" onsubmit="return confirm('Xóa tài khoản <%= u.username %>?');">
                                                         <button type="submit" class="btn-sm btn-del" title="Xóa tài khoản">🗑️</button>
                                                     </form>
@@ -378,6 +378,21 @@
                             <% } %>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Form Admin tạo nhanh tài khoản mới (nằm gọn trong cột trái) -->
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #f1f5f9;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 15px; color: #0f172a;">➕ Cấp Tài Khoản Mới</h4>
+                    <form method="POST" action="/admin/create-user" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" name="username" placeholder="Tên đăng nhập..." required style="flex: 1; min-width: 120px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                        <input type="password" name="password" placeholder="Mật khẩu..." required style="flex: 1; min-width: 120px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                        <select name="role" style="padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                            <option value="user">User</option>
+                            <option value="author">Author</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button type="submit" style="background: #318c5b; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;">+ Tạo</button>
+                    </form>
                 </div>
             </div>
 
@@ -402,6 +417,15 @@
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                                     <a href="/story/<%= story.id %>" class="btn-sm btn-view">👁️ Xem</a>
                                     <a href="/author/story/<%= story.id %>" class="btn-sm btn-chap">📑 Chương</a>
+
+                                    <!-- Nút đổi trạng thái truyện -->
+                                    <form method="POST" action="/admin/toggle-story-status/<%= story.id %>" style="margin: 0;">
+                                        <input type="hidden" name="current_status" value="<%= story.status || 'Đang cập nhật' %>">
+                                        <button type="submit" class="btn-sm btn-status" title="Đổi trạng thái hoàn thành">
+                                            <%= story.status === 'Đã hoàn thành' ? '✅ Hoàn thành' : '⏳ Đang ra' %>
+                                        </button>
+                                    </form>
+
                                     <form method="POST" action="/admin/delete-story/<%= story.id %>" style="margin: 0;" onsubmit="return confirm('Admin xác nhận xóa bộ truyện này?');">
                                         <button type="submit" class="btn-sm btn-del">🗑️ Xóa</button>
                                     </form>

@@ -9,10 +9,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0;
             background-color: #f4f6f9;
-            color: #333;
+            color: #1e293b;
         }
 
-        /* Thanh Menu top */
+        /* --- THANH MENU BAR --- */
         .nav {
             background: #78cfa0;
             padding: 12px 24px;
@@ -24,8 +24,6 @@
             z-index: 1000;
             flex-wrap: wrap;
         }
-
-        /* Chữ trên thanh Menu */
         .nav a, .dropdown-trigger {
             color: #f8fafc;
             text-decoration: none;
@@ -36,28 +34,26 @@
             display: inline-block;
             padding: 6px 0;
         }
-
-        /* Đổi sang xanh đậm khi di chuột hoặc ấn giữ */
         .nav a:hover, .nav a:active,
         .dropdown:hover .dropdown-trigger, .dropdown-trigger:active {
             color: #035935;
         }
 
-        /* --- THANH TÌM KIẾM TRÊN MENU BAR --- */
+        /* Thanh tìm kiếm bên phải Menu */
         .nav-search-form {
             display: flex;
             align-items: center;
             gap: 6px;
             margin-left: auto;
-            width: 340px;
-            max-width: 380px;
+            width: 320px;
+            max-width: 100%;
         }
         .nav-search-input {
             width: 100%;
             padding: 7px 14px;
             border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             color: #0f172a;
             font-size: 14px;
             outline: none;
@@ -80,7 +76,6 @@
             white-space: nowrap;
             transition: all 0.2s;
         }
-        /* Hiệu ứng chữ chuyển xanh đậm khi di chuột / ấn vào */
         .nav-btn-search:hover, .nav-btn-search:active {
             background: #ffffff;
             color: #035935;
@@ -94,28 +89,17 @@
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .nav-btn-clear:hover {
-            background: #ffffff;
-            color: #035935;
         }
 
-        /* Vùng bọc Dropdown Thể loại */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        /* --- MEGA MENU THỂ LOẠI --- */
+        /* Mega Menu Thể loại */
+        .dropdown { position: relative; display: inline-block; }
         .mega-menu {
             display: none;
             position: absolute;
-            top: 100%;
-            left: -20px;
+            top: 100%; left: -20px;
             width: 780px;
             max-width: calc(100vw - 48px);
-            background: rgba(18, 28, 24, 0.94);
+            background: rgba(18, 28, 24, 0.95);
             backdrop-filter: blur(12px);
             border-radius: 14px;
             padding: 24px 28px;
@@ -123,83 +107,269 @@
             color: #ffffff;
             z-index: 999;
         }
-        .dropdown:hover .mega-menu {
-            display: block;
-            animation: fadeInDown 0.2s ease;
-        }
+        .dropdown:hover .mega-menu { display: block; animation: fadeInDown 0.2s ease; }
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .mega-menu-title {
-            margin: 0 0 18px 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-            padding-bottom: 12px;
+            margin: 0 0 16px 0; font-size: 17px; color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 10px;
         }
-        .mega-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px 20px;
-        }
+        .mega-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 18px; }
         .mega-grid a {
-            color: #e2e8f0;
-            font-weight: 500;
-            font-size: 14px;
-            padding: 6px 8px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            display: block;
+            color: #e2e8f0; font-weight: 500; font-size: 14px;
+            padding: 6px 8px; border-radius: 6px; display: block;
         }
-        .mega-grid a:hover {
-            color: #78cfa0;
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(3px);
-        }
-        .mega-grid a.active {
-            color: #78cfa0;
-            font-weight: 700;
-        }
-
-        .container { max-width: 960px; margin: 30px auto; padding: 0 20px; }
-
-        /* Card bộ truyện */
-        .card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 16px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        .card h3 { margin: 0 0 8px 0; }
-        .card h3 a { color: #0f172a; text-decoration: none; font-size: 20px; }
-        .card h3 a:hover { color: #035935; }
+        .mega-grid a:hover { color: #78cfa0; background: rgba(255, 255, 255, 0.08); }
+        .mega-grid a.active { color: #78cfa0; font-weight: 700; }
 
         .btn-delete {
-            background: #ef4444; color: white;
-            border: none; padding: 6px 12px;
-            border-radius: 6px; cursor: pointer;
+            background: #ef4444; color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer;
             font-size: 13px; font-weight: 600;
+        }
+
+        /* --- CONTAINER CHÍNH --- */
+        .container {
+            max-width: 1140px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* --- BANNER CHÀO MỪNG NHẸ NHÀNG --- */
+        .hero-banner {
+            background: linear-gradient(135deg, #1b382d 0%, #2d6a4f 60%, #52b788 100%);
+            border-radius: 14px;
+            padding: 24px 32px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 20px rgba(3, 89, 53, 0.18);
+        }
+        .hero-banner h1 { margin: 0 0 6px 0; font-size: 24px; }
+        .hero-banner p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        /* --- THANH TAB PHÂN LOẠI (GIỐNG WEBNOVEL / CƠM NGUỘI) --- */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 24px;
+        }
+        .filter-tab {
+            padding: 10px 4px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #64748b;
+            text-decoration: none;
+            position: relative;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .filter-tab:hover { color: #035935; }
+        .filter-tab.active { color: #035935; }
+        .filter-tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            height: 3px;
+            background: #318c5b;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* --- LƯỚI POSTER BÌA TRUYỆN (5 CỘT) --- */
+        .story-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 24px 18px;
+        }
+        @media (max-width: 992px) { .story-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 768px) { .story-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 520px) { .story-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .book-card {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            group: hover;
+        }
+
+        /* Khung ảnh bìa tỉ lệ 3:4 đứng */
+        .book-cover-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            margin-bottom: 10px;
+            background: #1e293b;
+        }
+
+        /* Tạo bìa sách 3D tự động theo màu sắc từng thể loại */
+        .book-cover-art {
+            width: 100%;
+            height: 100%;
+            padding: 36px 14px 14px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #ffffff;
+            transition: transform 0.35s ease;
+            position: relative;
+        }
+        /* Gáy sách nổi 3D bên trái */
+        .book-cover-art::before {
+            content: "";
+            position: absolute;
+            top: 0; bottom: 0; left: 0; width: 9px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(255,255,255,0.15), rgba(0,0,0,0.2));
+        }
+
+        /* Các tông màu bìa tự động xoay vòng */
+        .cover-theme-0 { background: linear-gradient(145deg, #0f3d3e 0%, #1d6f5c 60%, #52b788 100%); }
+        .cover-theme-1 { background: linear-gradient(145deg, #2b193d 0%, #482880 60%, #7c4dff 100%); }
+        .cover-theme-2 { background: linear-gradient(145deg, #4a151b 0%, #8c2732 60%, #d9534f 100%); }
+        .cover-theme-3 { background: linear-gradient(145deg, #102a43 0%, #243b53 60%, #486581 100%); }
+        .cover-theme-4 { background: linear-gradient(145deg, #3b2f1e 0%, #70542f 60%, #b08948 100%); }
+
+        .book-card:hover .book-cover-art {
+            transform: scale(1.06);
+        }
+
+        /* Huy hiệu Thể loại góc trên bên phải (Giống Ảnh 3 & 4) */
+        .cover-cat-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+            color: #a7f3d0;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            z-index: 2;
+            border: 1px solid rgba(167, 243, 208, 0.3);
+        }
+
+        /* Ruy băng trạng thái góc trái (Giống Ảnh 2) */
+        .cover-ribbon {
+            position: absolute;
+            top: 10px;
+            left: -24px;
+            background: #f59e0b;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 26px;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            z-index: 2;
+            text-transform: uppercase;
+        }
+
+        .cover-art-title {
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.35;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .cover-art-author {
+            font-size: 11px;
+            opacity: 0.85;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            padding-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Lớp phủ nút "Đọc ngay" hiện khi rê chuột vào bìa */
+        .cover-hover-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(3, 89, 53, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            z-index: 3;
+        }
+        .book-card:hover .cover-hover-overlay {
+            opacity: 1;
+        }
+        .btn-overlay-read {
+            background: #ffffff;
+            color: #035935;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        }
+
+        /* Tên truyện & thông tin bên dưới bìa */
+        .book-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s;
+        }
+        .book-card:hover .book-title {
+            color: #035935;
+        }
+        .book-meta {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .empty-state {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            color: #64748b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
     </style>
 </head>
 <body>
 
-    <!-- Thanh Navigation  -->
+    <!-- Thanh Navigation -->
     <div class="nav">
         <a href="/">Trang Chủ</a>
 
         <!-- Dropdown Thể loại -->
         <div class="dropdown">
             <span class="dropdown-trigger">Thể loại ▾</span>
-
             <div class="mega-menu">
                 <h4 class="mega-menu-title">Danh Mục Thể Loại Truyện</h4>
                 <div class="mega-grid">
@@ -216,7 +386,7 @@
             </div>
         </div>
 
-        <!-- Thanh Tìm Kiếm được đẩy sang bên phải -->
+        <!-- Thanh Tìm Kiếm bên phải -->
         <form method="GET" action="/" class="nav-search-form">
             <% if (selectedCategory && selectedCategory !== 'All') { %>
                 <input type="hidden" name="category" value="<%= selectedCategory %>">
@@ -228,23 +398,19 @@
             <% } %>
         </form>
 
-        <!-- Phần tài khoản sát lề phải -->
+        <!-- Phần tài khoản -->
         <div style="display: flex; align-items: center; gap: 15px;">
             <% if (user) { %>
                 <span style="color: #035935; font-size: 14px;">Chào, <b><%= user.username %></b> (<%= user.role %>)</span>
-
                 <% if (user.role === 'author' || user.role === 'admin') { %>
                     <a href="/author">Khu vực Tác Giả</a>
                 <% } %>
-
                 <% if (user.role === 'admin') { %>
                     <a href="/admin">Khu vực Admin</a>
                 <% } %>
-
                 <form method="POST" action="/user/delete-own-account" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn XÓA TÀI KHOẢN này vĩnh viễn?');">
                     <button type="submit" class="btn-delete">Xóa Tài Khoản</button>
                 </form>
-
                 <a href="/logout">Đăng Xuất</a>
             <% } else { %>
                 <a href="/login">Đăng Nhập</a>
@@ -252,35 +418,78 @@
             <% } %>
         </div>
     </div>
+
     <!-- Nội dung chính -->
     <div class="container">
-        <h2>
-            Danh Sách Truyện Mới Cập Nhật
-            <% if (selectedCategory && selectedCategory !== 'All') { %>
-                — Thể loại: <span style="color: #035935;"><%= selectedCategory %></span>
-            <% } %>
-            <% if (searchQuery) { %>
-                — Từ khóa: "<span style="color: #035935;"><%= searchQuery %></span>"
-            <% } %>
-        </h2>
 
-        <!-- Danh sách truyện -->
+        <!-- Banner giới thiệu -->
+        <div class="hero-banner">
+            <div>
+                <h1>Khám Phá Thế Giới Truyện Chữ</h1>
+                <p>Đọc truyện miễn phí, cập nhật chương mới liên tục mỗi ngày.</p>
+            </div>
+            <% if (user && (user.role === 'author' || user.role === 'admin')) { %>
+                <a href="/author" style="background: #ffffff; color: #035935; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
+                    + Đăng Truyện Mới
+                </a>
+            <% } %>
+        </div>
+
+        <!-- Thanh Tab điều hướng giống WebNovel -->
+        <div class="section-header">
+            <div class="filter-tabs">
+                <a href="/" class="filter-tab <%= (!selectedCategory || selectedCategory === 'All') && !searchQuery ? 'active' : '' %>">
+                    Truyện Mới Cập Nhật
+                </a>
+                <% if (selectedCategory && selectedCategory !== 'All') { %>
+                    <span class="filter-tab active">Thể loại: <%= selectedCategory %></span>
+                <% } %>
+                <% if (searchQuery) { %>
+                    <span class="filter-tab active">Kết quả: "<%= searchQuery %>"</span>
+                <% } %>
+            </div>
+            <span style="font-size: 13px; color: #64748b;">Hiển thị <b><%= stories ? stories.length : 0 %></b> tác phẩm</span>
+        </div>
+
+        <!-- Lưới Poster Bìa Sách Đứng -->
         <% if (stories && stories.length > 0) { %>
-            <% stories.forEach(story => { %>
-                <div class="card">
-                    <h3><a href="/story/<%= story.id %>"><%= story.title %></a></h3>
-                    <p>
-                        Tác giả: <b><%= story.author_name %></b> |
-                        Thể loại: <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold;"><%= story.category || 'Khác' %></span>
-                    </p>
-                    <p><%= story.description %></p>
-                </div>
-            <% }) %>
+            <div class="story-grid">
+                <% stories.forEach((story, index) => { %>
+                    <a href="/story/<%= story.id %>" class="book-card">
+                        <div class="book-cover-wrap">
+                            <!-- Ruy băng góc trái -->
+                            <span class="cover-ribbon">HOT</span>
+
+                            <!-- Nhãn Thể loại góc trên bên phải -->
+                            <span class="cover-cat-badge"><%= story.category || 'Khác' %></span>
+
+                            <!-- Bìa sách 3D tự động đổi tông màu -->
+                            <div class="book-cover-art cover-theme-<%= index % 5 %>">
+                                <div class="cover-art-title"><%= story.title %></div>
+                                <div class="cover-art-author">✍ <%= story.author_name || 'Tác giả' %></div>
+                            </div>
+
+                            <!-- Nút Đọc ngay hiện khi di chuột -->
+                            <div class="cover-hover-overlay">
+                                <span class="btn-overlay-read">📖 Đọc ngay</span>
+                            </div>
+                        </div>
+
+                        <h3 class="book-title"><%= story.title %></h3>
+                        <div class="book-meta">
+                            <span>✍ <%= story.author_name || 'Ẩn danh' %></span>
+                            <span style="color: #318c5b; font-weight: 600;">Đọc &rsaquo;</span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
         <% } else { %>
-            <div class="card">
-                <p>Không tìm thấy bộ truyện nào phù hợp với từ khóa/thể loại đã chọn.</p>
+            <div class="empty-state">
+                <p style="font-size: 16px; margin-bottom: 12px;">Không tìm thấy bộ truyện nào phù hợp với từ khóa hoặc thể loại đã chọn.</p>
+                <a href="/" style="color: #035935; font-weight: 700; text-decoration: none;">← Xem tất cả truyện</a>
             </div>
         <% } %>
+
     </div>
 
 </body>

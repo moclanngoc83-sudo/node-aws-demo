@@ -216,6 +216,123 @@
             padding-top: 24px;
             border-top: 1px solid #e2e8f0;
         }
+    /* --- POPUP MODAL MỤC LỤC CHƯƠNG --- */
+        .toc-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .toc-modal-overlay.show { display: flex; }
+
+        .toc-modal-box {
+            background: #ffffff;
+            color: #1e293b;
+            width: 100%;
+            max-width: 720px;
+            max-height: 82vh;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: popIn 0.2s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .toc-modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+        }
+        .toc-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #035935;
+        }
+        .toc-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .toc-close-btn:hover { color: #0f172a; }
+
+        .toc-modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 18px;
+        }
+        @media (max-width: 600px) {
+            .toc-modal-body { grid-template-columns: 1fr; }
+        }
+
+        .toc-chap-item {
+            display: block;
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.15s;
+        }
+        .toc-chap-item:hover {
+            background: #e6f7ef;
+            border-color: #78cfa0;
+            color: #035935;
+        }
+        .toc-chap-item.current {
+            background: #318c5b;
+            color: #ffffff;
+            border-color: #318c5b;
+        }
+
+        /* Đồng bộ Dark Mode cho Popup Mục Lục */
+        body.theme-dark .toc-modal-box {
+            background: #19221f;
+            color: #f1f5f9;
+            border: 1px solid #26332e;
+        }
+        body.theme-dark .toc-modal-header {
+            background: #141c19;
+            border-color: #26332e;
+        }
+        body.theme-dark .toc-modal-header h3 { color: #78cfa0; }
+        body.theme-dark .toc-chap-item {
+            background: #222e2a;
+            border-color: #2f3f3a;
+            color: #e2e8f0;
+        }
+        body.theme-dark .toc-chap-item:hover {
+            background: #2b3b36;
+            color: #78cfa0;
+        }
+        body.theme-dark .toc-chap-item.current {
+            background: #318c5b;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -274,7 +391,7 @@
                         <span class="btn-chap disabled">← Chương Trước</span>
                     <% } %>
 
-                    <a href="/story/<%= chapter.story_id %>" class="btn-toc">📑 Mục Lục</a>
+                    <button type="button" class="btn-toc" style="cursor: pointer;" onclick="openTocModal()">📑 Mục Lục</button>
 
                     <% if (nextChapterId) { %>
                         <a href="/chapter/<%= nextChapterId %>" id="nextChapLink" class="btn-chap">Chương Sau →</a>
@@ -307,6 +424,28 @@
             </div>
         </div>
 
+    </div>
+    <!-- POPUP MODAL DANH SÁCH CHƯƠNG (MỤC LỤC) -->
+    <div class="toc-modal-overlay" id="tocModal" onclick="closeTocModal(event)">
+        <div class="toc-modal-box" onclick="event.stopPropagation()">
+            <div class="toc-modal-header">
+                <h3>📑 Danh Sách Chương (<%= typeof chapters !== 'undefined' ? chapters.length : 0 %>)</h3>
+                <button type="button" class="toc-close-btn" onclick="forceCloseToc()">&times;</button>
+            </div>
+            <div class="toc-modal-body" id="tocModalBody">
+                <% if (typeof chapters !== 'undefined' && chapters.length > 0) { %>
+                    <% chapters.forEach(item => { %>
+                        <a href="/chapter/<%= item.id %>"
+                           class="toc-chap-item <%= item.id === chapter.id ? 'current' : '' %>"
+                           id="<%= item.id === chapter.id ? 'activeTocItem' : '' %>">
+                            <%= item.title %>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <p style="color: #64748b; grid-column: 1 / -1; text-align: center;">Chưa có danh sách chương.</p>
+                <% } %>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -371,6 +510,64 @@
                 if (next) window.location.href = next.href;
             }
         });
+
+    function openTocModal() {
+                const modal = document.getElementById('tocModal');
+                modal.classList.add('show');
+                // Tự động cuộn tới đúng chương đang đọc
+                const activeItem = document.getElementById('activeTocItem');
+                if (activeItem) {
+                    activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+            }
+
+            function forceCloseToc() {
+                document.getElementById('tocModal').classList.remove('show');
+            }
+
+            function closeTocModal(event) {
+                if (event.target.id === 'tocModal') {
+                    forceCloseToc();
+                }
+            }
+function openTocModal() {
+            const modal = document.getElementById('tocModal');
+            modal.classList.add('show');
+            // Tự động cuộn tới đúng chương đang đọc
+            const activeItem = document.getElementById('activeTocItem');
+            if (activeItem) {
+                activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+        }
+
+        function forceCloseToc() {
+            document.getElementById('tocModal').classList.remove('show');
+        }
+
+        function closeTocModal(event) {
+            if (event.target.id === 'tocModal') {
+                forceCloseToc();
+            }
+        }
+        function openTocModal() {
+                const modal = document.getElementById('tocModal');
+                modal.classList.add('show');
+                // Tự động cuộn tới đúng chương đang đọc
+                const activeItem = document.getElementById('activeTocItem');
+                if (activeItem) {
+                    activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+            }
+
+            function forceCloseToc() {
+                document.getElementById('tocModal').classList.remove('show');
+            }
+
+            function closeTocModal(event) {
+                if (event.target.id === 'tocModal') {
+                    forceCloseToc();
+                }
+            }
 
         applySettings();
     </script>

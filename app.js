@@ -157,25 +157,31 @@ app.get('/story/:id', (req, res) => {
 });
 
 // Trang đọc chương truyện
+// Trang đọc chương truyện (kèm danh sách toàn bộ chương cho Popup Mục Lục)
 app.get('/chapter/:id', (req, res) => {
   const currentChapterId = parseInt(req.params.id);
   db.get(`SELECT * FROM chapters WHERE id = ?`, [currentChapterId], (err, chapter) => {
     if (!chapter) return res.send('Không tìm thấy chương!');
-    db.get(
-      `SELECT id FROM chapters WHERE story_id = ? AND id < ? ORDER BY id DESC LIMIT 1`,
-      [chapter.story_id, chapter.id],
-      (err, prevChapter) => {
-        db.get(
-          `SELECT id FROM chapters WHERE story_id = ? AND id > ? ORDER BY id ASC LIMIT 1`,
-          [chapter.story_id, chapter.id],
-          (err, nextChapter) => {
-            res.render('read', {
-              chapter,
-              prevChapterId: prevChapter ? prevChapter.id : null,
-              nextChapterId: nextChapter ? nextChapter.id : null
-            });
-          }
-        );
+
+    // Lấy toàn bộ chương của bộ truyện để hiển thị trong Popup Mục Lục
+    db.all(
+      `SELECT id, chapter_number, title FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC, id ASC`,
+      [chapter.story_id],
+      (err, allChapters) => {
+        const chaptersList = allChapters || [];
+        const currentIndex = chaptersList.findIndex(c => c.id === currentChapterId);
+
+        const prevChapterId = currentIndex > 0 ? chaptersList[currentIndex - 1].id : null;
+        const nextChapterId = (currentIndex !== -1 && currentIndex < chaptersList.length - 1)
+          ? chaptersList[currentIndex + 1].id
+          : null;
+
+        res.render('read', {
+          chapter,
+          chapters: chaptersList,
+          prevChapterId,
+          nextChapterId
+        });
       }
     );
   });

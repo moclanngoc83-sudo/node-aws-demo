@@ -35,6 +35,43 @@
             padding: 6px 0;
         }
         .nav a:hover, .nav a:active,
+        /* --- LOGO THƯƠNG HIỆU NỔI BẬT --- */
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+            padding: 7px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 12px rgba(3, 89, 53, 0.25);
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 6px;
+        }
+        .brand-logo:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(3, 89, 53, 0.35);
+        }
+        .brand-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+        .brand-text {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff 0%, #fef08a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.45);
+            margin-right: 4px;
+        }
         .dropdown:hover .dropdown-trigger, .dropdown-trigger:active {
             color: #035935;
         }
@@ -495,10 +532,12 @@
 
         <!-- Thanh Navigation -->
         <div class="nav">
-            <a href="/" style="font-size: 19px; font-weight: 900; color: #035935; display: flex; align-items: center; gap: 7px; letter-spacing: 0.3px;">
-                📚 Kho Tàng Truyện
-            </a>
-            <a href="/">Trang Chủ</a>
+            <a href="/" class="brand-logo">
+                        <span class="brand-icon">📚</span>
+                        <span class="brand-text">Kho Tàng Truyện</span>
+                    </a>
+                    <span class="nav-divider"></span>
+                    <a href="/">Trang Chủ</a>
         <!-- Dropdown Thể loại -->
         <div class="dropdown">
             <span class="dropdown-trigger">Thể loại ▾</span>

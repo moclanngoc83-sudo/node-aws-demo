@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title><%= chapter.title %> - Đọc Truyện Online</title>
+    <title><%= chapter.title %> - Kho Tàng Truyện</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -339,7 +339,7 @@
 
     <!-- Thanh Menu trên cùng -->
     <div class="nav">
-        <a href="/">Trang Chủ</a>
+        <a href="/" style="font-weight: 900; color: #035935;">📚 Kho Tàng Truyện</a>
         <a href="/story/<%= chapter.story_id %>">← Danh sách chương</a>
         <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
             <% if (typeof user !== 'undefined' && user) { %>
